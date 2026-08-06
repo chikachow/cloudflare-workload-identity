@@ -1,0 +1,17 @@
+{
+  "name": "workload-identity-discovery",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "deploy:dry-run": "WRANGLER_LOG=none WRANGLER_LOG_PATH=../../.wrangler/logs WRANGLER_REGISTRY_PATH=../../.wrangler/registry wrangler deploy --dry-run --config wrangler.jsonc",
+    "typecheck": "node --run types:generate && tsc --project tsconfig.json",
+    "types:generate": "node -e \"require('node:fs').mkdirSync('.wrangler/types', { recursive: true })\" && WRANGLER_LOG=none WRANGLER_LOG_PATH=../../.wrangler/logs WRANGLER_REGISTRY_PATH=../../.wrangler/registry wrangler types .wrangler/types/worker-configuration.d.ts --config wrangler.jsonc --env-interface WorkloadIdentityDiscoveryBindings --strict-vars false"
+  },
+  "dependencies": {
+    "workload-identity-profile": "workspace:*"
+  }
+}

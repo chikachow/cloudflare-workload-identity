@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": { "lib": ["ES2024", "WebWorker"], "types": ["node"] },
+  "include": [
+    "test/support/**/*.ts",
+    "test/workload-identity-issuer.test.ts",
+    "workers/workload-identity-issuer/.wrangler/types/worker-configuration.d.ts"
+  ]
+}

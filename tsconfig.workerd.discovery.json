@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2024", "WebWorker"],
+    "types": ["@cloudflare/vitest-pool-workers/types"]
+  },
+  "include": [
+    "test/workers/discovery/**/*.ts",
+    "workers/workload-identity-discovery/.wrangler/types/worker-configuration.d.ts"
+  ]
+}

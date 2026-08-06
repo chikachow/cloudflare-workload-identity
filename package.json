@@ -1,0 +1,43 @@
+{
+  "name": "cloudflare-workload-identity",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --run lockfile:check && node --run format:check && node --run lint && node --run typecheck && node --run test && node --run deploy:dry-run",
+    "deploy:dry-run": "pnpm --recursive --filter './workers/*' run deploy:dry-run",
+    "format": "oxfmt . '!docs/research/oauth-oidc-terminology.md'",
+    "format:check": "oxfmt --check . '!docs/research/oauth-oidc-terminology.md'",
+    "lint": "oxlint --report-unused-disable-directives --deny-warnings .",
+    "lint:fix": "oxlint --fix .",
+    "lockfile:check": "pnpm install --lockfile-only --frozen-lockfile",
+    "test": "node --run test:unit && node --run test:workerd:issuer && node --run test:workerd:discovery",
+    "test:coverage": "node --run test:unit:coverage && node --run test:workerd:issuer:coverage && node --run test:workerd:discovery:coverage",
+    "test:unit": "WRANGLER_LOG=none WRANGLER_LOG_PATH=.wrangler/logs WRANGLER_REGISTRY_PATH=.wrangler/registry vitest run --config vitest.config.ts",
+    "test:unit:coverage": "WRANGLER_LOG=none WRANGLER_LOG_PATH=.wrangler/logs WRANGLER_REGISTRY_PATH=.wrangler/registry vitest run --coverage --config vitest.config.ts",
+    "test:workerd:discovery": "WRANGLER_LOG=none WRANGLER_LOG_PATH=.wrangler/logs WRANGLER_REGISTRY_PATH=.wrangler/registry vitest run --config vitest.discovery-workers.config.ts",
+    "test:workerd:discovery:coverage": "WRANGLER_LOG=none WRANGLER_LOG_PATH=.wrangler/logs WRANGLER_REGISTRY_PATH=.wrangler/registry vitest run --coverage --config vitest.discovery-workers.config.ts",
+    "test:workerd:issuer": "WRANGLER_LOG=none WRANGLER_LOG_PATH=.wrangler/logs WRANGLER_REGISTRY_PATH=.wrangler/registry vitest run --config vitest.issuer-workers.config.ts",
+    "test:workerd:issuer:coverage": "WRANGLER_LOG=none WRANGLER_LOG_PATH=.wrangler/logs WRANGLER_REGISTRY_PATH=.wrangler/registry vitest run --coverage --config vitest.issuer-workers.config.ts",
+    "typecheck": "pnpm --recursive --filter './workers/*' run typecheck && tsc --project tsconfig.json && tsc --project tsconfig.unit.issuer.json && tsc --project tsconfig.unit.discovery.json && tsc --project tsconfig.workerd.issuer.json && tsc --project tsconfig.workerd.discovery.json",
+    "types:generate": "pnpm --recursive --filter './workers/*' run types:generate"
+  },
+  "dependencies": {
+    "jose": "6.2.5"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "0.20.1",
+    "@tsconfig/strictest": "2.0.8",
+    "@types/node": "24.13.3",
+    "@vitest/coverage-istanbul": "4.1.10",
+    "oxfmt": "0.61.0",
+    "oxlint": "1.76.0",
+    "typescript": "7.0.2",
+    "vitest": "4.1.10",
+    "wrangler": "4.116.0"
+  },
+  "engines": {
+    "node": "24"
+  },
+  "packageManager": "pnpm@10.33.0"
+}
