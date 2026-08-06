@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2024", "WebWorker"],
+    "rootDir": ".",
+    "types": ["node"]
+  },
+  "include": [
+    "packages/workload-identity-profile/src/**/*.ts",
+    "test/support/**/*.ts",
+    "test/workload-identity-profile.test.ts"
+  ],
+  "exclude": []
+}
