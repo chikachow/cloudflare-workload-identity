@@ -3,9 +3,9 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildWorkloadFederationMetadata,
-  parseAndValidatePublicJwkSet,
   requireCanonicalRootHttpsIssuer,
   requireOpaqueWorkloadSubject,
+  validatePublicJwkSet,
 } from "../packages/workload-identity-profile/src/index.ts";
 import { signingPublicJwk } from "./support/signing-key.ts";
 
@@ -65,42 +65,41 @@ describe("workload identity profile", () => {
   it("retains public per-key extensions and removes root configuration-only members", async () => {
     const key = { ...signingPublicJwk, x_rotation: "next" };
     await expect(
-      parseAndValidatePublicJwkSet(
-        JSON.stringify({ cache_hint: "configuration-only", keys: [key] }),
-      ),
+      validatePublicJwkSet({ cache_hint: "configuration-only", keys: [key] }),
     ).resolves.toEqual({ keys: [key] });
   });
 
   for (const [name, value, message] of [
-    ["malformed structure", JSON.stringify({ keys: [{}] }), "RSA public keys"],
+    [
+      "JSON text instead of a structured binding",
+      JSON.stringify({ keys: [signingPublicJwk] }),
+      "object containing at least one public JWK",
+    ],
+    ["malformed structure", { keys: [{}] }, "RSA public keys"],
     [
       "private material",
-      JSON.stringify({ keys: [{ ...signingPublicJwk, d: "private" }] }),
+      { keys: [{ ...signingPublicJwk, d: "private" }] },
       "private or symmetric key material",
     ],
     [
       "wrong algorithm or use",
-      JSON.stringify({ keys: [{ ...signingPublicJwk, alg: "RS512", use: "enc" }] }),
+      { keys: [{ ...signingPublicJwk, alg: "RS512", use: "enc" }] },
       "alg RS256 and use sig",
     ],
     [
       "unusable key",
-      JSON.stringify({ keys: [{ ...signingPublicJwk, key_ops: [] }] }),
+      { keys: [{ ...signingPublicJwk, key_ops: [] }] },
       "unusable RS256 verification key",
     ],
     [
       "wrong thumbprint",
-      JSON.stringify({ keys: [{ ...signingPublicJwk, kid: "not-a-thumbprint" }] }),
+      { keys: [{ ...signingPublicJwk, kid: "not-a-thumbprint" }] },
       "RFC 7638 thumbprint",
     ],
-    [
-      "duplicate kid",
-      JSON.stringify({ keys: [signingPublicJwk, signingPublicJwk] }),
-      "duplicate kid",
-    ],
+    ["duplicate kid", { keys: [signingPublicJwk, signingPublicJwk] }, "duplicate kid"],
   ] as const) {
     it(`rejects JWK Sets with ${name}`, async () => {
-      await expect(parseAndValidatePublicJwkSet(value)).rejects.toThrow(message);
+      await expect(validatePublicJwkSet(value)).rejects.toThrow(message);
     });
   }
 
@@ -122,8 +121,6 @@ describe("workload identity profile", () => {
       kid: await calculateJwkThumbprint(publicJwk),
       use: "sig",
     };
-    await expect(parseAndValidatePublicJwkSet(JSON.stringify({ keys: [key] }))).rejects.toThrow(
-      "at least 2048 bits",
-    );
+    await expect(validatePublicJwkSet({ keys: [key] })).rejects.toThrow("at least 2048 bits");
   });
 });

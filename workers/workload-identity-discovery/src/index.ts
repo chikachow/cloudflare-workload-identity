@@ -1,6 +1,6 @@
 import {
   buildWorkloadFederationMetadata,
-  parseAndValidatePublicJwkSet,
+  validatePublicJwkSet,
   workloadIdentityDiscoveryPath,
   workloadIdentityJwksPath,
 } from "workload-identity-profile";
@@ -23,11 +23,11 @@ export async function handleDiscoveryRequest(
   switch (new URL(request.url).pathname) {
     case workloadIdentityDiscoveryPath: {
       const metadata = buildWorkloadFederationMetadata(env.ISSUER);
-      await parseAndValidatePublicJwkSet(env.PUBLIC_JWK_SET);
+      await validatePublicJwkSet(env.PUBLIC_JWK_SET);
       return Response.json(metadata, { headers: publicJsonHeaders });
     }
     case workloadIdentityJwksPath: {
-      const jwkSet = await parseAndValidatePublicJwkSet(env.PUBLIC_JWK_SET);
+      const jwkSet = await validatePublicJwkSet(env.PUBLIC_JWK_SET);
       return Response.json(jwkSet, { headers: publicJsonHeaders });
     }
     default:
