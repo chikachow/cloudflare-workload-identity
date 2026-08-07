@@ -30,7 +30,7 @@
     "@tsconfig/strictest": "2.0.8",
     "@types/node": "24.13.3",
     "@vitest/coverage-istanbul": "4.1.10",
-    "oxfmt": "0.61.0",
+    "oxfmt": "0.62.0",
     "oxlint": "1.76.0",
     "typescript": "7.0.2",
     "vitest": "4.1.10",
