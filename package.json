@@ -23,7 +23,7 @@
     "types:generate": "pnpm --recursive --filter './workers/*' run types:generate"
   },
   "dependencies": {
-    "jose": "6.2.5"
+    "jose": "6.2.8"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "0.20.1",
