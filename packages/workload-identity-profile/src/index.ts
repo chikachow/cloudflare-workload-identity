@@ -91,25 +91,14 @@ export function buildWorkloadFederationMetadata(issuerValue: unknown): WorkloadF
   };
 }
 
-export async function parseAndValidatePublicJwkSet(value: unknown): Promise<PublicJwkSet> {
-  if (typeof value !== "string") {
-    throw new Error("PUBLIC_JWK_SET must be a JSON string.");
-  }
-
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(value);
-  } catch {
-    throw new Error("PUBLIC_JWK_SET must be valid JSON.");
-  }
-
-  if (!isRecord(parsed) || !Array.isArray(parsed["keys"]) || parsed["keys"].length === 0) {
-    throw new Error("PUBLIC_JWK_SET must contain at least one public JWK.");
+export async function validatePublicJwkSet(value: unknown): Promise<PublicJwkSet> {
+  if (!isRecord(value) || !Array.isArray(value["keys"]) || value["keys"].length === 0) {
+    throw new Error("PUBLIC_JWK_SET must be an object containing at least one public JWK.");
   }
 
   const keyIds = new Set<string>();
   const keys: PublicRsaJwk[] = [];
-  for (const key of parsed["keys"]) {
+  for (const key of value["keys"]) {
     const publicKey = await validatePublicRsaJwk(key);
     if (keyIds.has(publicKey.kid)) {
       throw new Error("PUBLIC_JWK_SET must not contain duplicate kid values.");

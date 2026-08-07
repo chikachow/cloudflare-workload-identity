@@ -104,7 +104,9 @@ verification key, and have `kid` equal to its RFC 7638 public-key thumbprint.
 The configured and emitted JWK Set has the canonical root shape
 `{ "keys": [...] }`; root-level extension members are not published. Per-key
 extensions are allowed only when they do not contain private or symmetric key
-material and the key still imports for RS256 verification.
+material and the key still imports for RS256 verification. `PUBLIC_JWK_SET` is
+configured as a structured JSON `vars` binding with that root shape, not as a
+JSON document encoded inside a string.
 
 The signing private PKCS#8 key is subject to the same 2048-bit RSA minimum
 after import. Public JWK material is validated on every executed discovery or

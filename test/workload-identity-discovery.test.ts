@@ -8,10 +8,10 @@ describe("workload identity discovery configuration", () => {
   for (const [name, publicJwkSet, message] of [
     [
       "private JWK material",
-      '{"keys":[{"kty":"RSA","d":"private"}]}',
+      { keys: [{ d: "private", kty: "RSA" }] },
       "private or symmetric key material",
     ],
-    ["an empty JWK Set", '{"keys":[]}', "at least one public JWK"],
+    ["an empty JWK Set", { keys: [] }, "at least one public JWK"],
   ] as const) {
     it(`refuses to publish ${name}`, async () => {
       await expect(
