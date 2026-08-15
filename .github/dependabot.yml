@@ -7,6 +7,7 @@ updates:
       day: monday
       time: "09:00"
       timezone: Australia/Sydney
+    open-pull-requests-limit: 10
   - package-ecosystem: npm
     directory: /
     schedule:
@@ -24,6 +25,10 @@ updates:
         patterns:
           - "@cloudflare/vitest-pool-workers"
           - wrangler
+      oxc-tooling:
+        patterns:
+          - oxfmt
+          - oxlint
       vitest:
         patterns:
           - vitest
