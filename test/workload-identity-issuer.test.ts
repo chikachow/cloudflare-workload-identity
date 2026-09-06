@@ -1,5 +1,5 @@
 import { exportPKCS8, jwtVerify } from "jose";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   AudienceNotAllowedError,
@@ -14,16 +14,32 @@ const validEnv = { ISSUER: issuer, SIGNING_PRIVATE_KEY: signingPrivateKeyPem };
 const validProps = { allowedAudiences: [audience], subject };
 
 describe("WorkloadIdentityIssuer RPC issueToken", () => {
-  it("rejects a malformed audience", async () => {
-    await expect(issueWorkloadIdentityToken("", validEnv, validProps)).rejects.toBeInstanceOf(
-      AudienceNotAllowedError,
+  it.each([
+    undefined,
+    null,
+    42,
+    [audience],
+    "",
+    " ",
+    "https://example.invalid",
+    `${audience}/`,
+    audience.toUpperCase(),
+    ` ${audience}`,
+    `${audience} `,
+  ])("rejects audience %j before reading the signing secret", async (requestedAudience) => {
+    const get = vi.fn(async () => signingPrivateKeyPem);
+    const issued = issueWorkloadIdentityToken(
+      requestedAudience,
+      { ...validEnv, SIGNING_PRIVATE_KEY: { get } },
+      validProps,
     );
-  });
 
-  it("rejects an audience outside the allowed audience set", async () => {
-    await expect(
-      issueWorkloadIdentityToken("https://example.invalid", validEnv, validProps),
-    ).rejects.toBeInstanceOf(AudienceNotAllowedError);
+    await expect(issued).rejects.toBeInstanceOf(AudienceNotAllowedError);
+    await expect(issued).rejects.toMatchObject({
+      name: "AudienceNotAllowedError",
+      message: "The requested audience is not allowed.",
+    });
+    expect(get).not.toHaveBeenCalled();
   });
 
   it("issues an RS256 token with exactly the closed claim contract", async () => {
@@ -60,11 +76,32 @@ describe("WorkloadIdentityIssuer RPC issueToken", () => {
       { ISSUER: issuer, SIGNING_PRIVATE_KEY: { get: async () => signingPrivateKeyPem } },
       validProps,
     );
-    expect(issued).toEqual({ token: expect.any(String) });
+    const verified = await jwtVerify(issued.token, signingPublicJwk, {
+      algorithms: ["RS256"],
+      audience,
+      issuer,
+    });
+    expect(verified.payload.sub).toBe(subject);
+  });
+
+  it("preserves the exact bound audience and subject", async () => {
+    const exactAudience = ` ${audience} `;
+    const boundSubject = "another-workload";
+    const issued = await issueWorkloadIdentityToken(exactAudience, validEnv, {
+      allowedAudiences: [audience, exactAudience],
+      subject: boundSubject,
+    });
+    const verified = await jwtVerify(issued.token, signingPublicJwk, {
+      algorithms: ["RS256"],
+      audience: exactAudience,
+      issuer,
+    });
+    expect(verified.payload.sub).toBe(boundSubject);
   });
 
   for (const [name, props, message] of [
     ["absent props", undefined, "binding properties are required"],
+    ["null props", null, "binding properties are required"],
     ["array props", [], "binding properties are required"],
     [
       "empty allowedAudiences",
@@ -76,6 +113,11 @@ describe("WorkloadIdentityIssuer RPC issueToken", () => {
       { allowedAudiences: [""], subject },
       "allowedAudiences must contain non-empty strings",
     ],
+    [
+      "invalid entry after an allowed audience",
+      { allowedAudiences: [audience, 42], subject },
+      "allowedAudiences must contain non-empty strings",
+    ],
     ["absent subject", { allowedAudiences: [audience] }, "binding subject"],
     [
       "invalid subject",
@@ -84,9 +126,13 @@ describe("WorkloadIdentityIssuer RPC issueToken", () => {
     ],
   ] as const) {
     it(`fails closed for ${name}`, async () => {
-      await expect(issueWorkloadIdentityToken(audience, validEnv, props as never)).rejects.toThrow(
-        message,
-      );
+      const get = vi.fn(async () => signingPrivateKeyPem);
+      const env = { ...validEnv, SIGNING_PRIVATE_KEY: { get } };
+      await expect(
+        // Exercise malformed runtime bindings despite the caller-facing type.
+        issueWorkloadIdentityToken(audience, env, props as never),
+      ).rejects.toThrow(message);
+      expect(get).not.toHaveBeenCalled();
     });
   }
 

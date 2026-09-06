@@ -1,4 +1,4 @@
-import { calculateJwkThumbprint, exportJWK, importPKCS8, SignJWT } from "jose";
+import { calculateJwkThumbprint, importPKCS8, SignJWT } from "jose";
 import {
   requireCanonicalRootHttpsIssuer,
   requireMinimumRsaModulusLength,
@@ -42,46 +42,31 @@ export async function issueWorkloadIdentityToken(
   now = Math.floor(Date.now() / 1_000),
 ): Promise<IssuedToken> {
   const issuer = requireCanonicalRootHttpsIssuer(env.ISSUER);
-  const { allowedAudiences, subject } = requireProps(props);
-
-  if (
-    typeof audience !== "string" ||
-    audience.trim().length === 0 ||
-    !allowedAudiences.includes(audience)
-  ) {
-    throw new AudienceNotAllowedError();
-  }
-
-  const privateKey = await importPKCS8(
-    await resolveSigningPrivateKey(env.SIGNING_PRIVATE_KEY),
-    "RS256",
-    {
-      extractable: true,
-    },
-  );
-  requireMinimumRsaModulusLength(privateKey, "SIGNING_PRIVATE_KEY");
-  const kid = await calculateJwkThumbprint(await exportJWK(privateKey));
-  const expiresAt = now + tokenLifetimeSeconds;
+  const workload = authorizeWorkload(audience, props);
+  const { privateKey, kid } = await loadSigningKey(env.SIGNING_PRIVATE_KEY);
 
   const token = await new SignJWT({})
     .setProtectedHeader({ alg: workloadIdentityAlgorithm, kid, typ: workloadIdentityTokenType })
     .setIssuer(issuer)
-    .setSubject(subject)
-    .setAudience(audience)
+    .setSubject(workload.subject)
+    .setAudience(workload.audience)
     .setIssuedAt(now)
-    .setExpirationTime(expiresAt)
+    .setExpirationTime(now + tokenLifetimeSeconds)
     .setJti(crypto.randomUUID())
     .sign(privateKey);
 
   return { token };
 }
 
-function requireProps(value: unknown): WorkloadIdentityIssuerProps {
+function authorizeWorkload(
+  audience: unknown,
+  value: unknown,
+): { subject: string; audience: string } {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     throw new Error("Workload identity binding properties are required.");
   }
 
-  const { allowedAudiences, subject } = value as Partial<WorkloadIdentityIssuerProps>;
+  const { allowedAudiences, subject } = value as Record<string, unknown>;
   const validatedSubject = requireOpaqueWorkloadSubject(subject);
   if (
     !Array.isArray(allowedAudiences) ||
@@ -94,13 +79,23 @@ function requireProps(value: unknown): WorkloadIdentityIssuerProps {
     throw new Error("Workload identity binding allowedAudiences must contain non-empty strings.");
   }
 
-  return { allowedAudiences, subject: validatedSubject };
+  if (typeof audience !== "string" || !allowedAudiences.includes(audience)) {
+    throw new AudienceNotAllowedError();
+  }
+
+  return { audience, subject: validatedSubject };
 }
 
-async function resolveSigningPrivateKey(binding: SigningPrivateKeySource): Promise<string> {
+async function loadSigningKey(
+  binding: SigningPrivateKeySource,
+): Promise<{ privateKey: CryptoKey; kid: string }> {
   const value = typeof binding === "string" ? binding : await binding.get();
   if (value.trim().length === 0) {
     throw new Error("SIGNING_PRIVATE_KEY is empty.");
   }
-  return value;
+  // Exportability is needed only to derive the public-key thumbprint used as kid.
+  const privateKey = await importPKCS8(value, workloadIdentityAlgorithm, { extractable: true });
+  requireMinimumRsaModulusLength(privateKey, "SIGNING_PRIVATE_KEY");
+  const kid = await calculateJwkThumbprint(privateKey);
+  return { privateKey, kid };
 }
