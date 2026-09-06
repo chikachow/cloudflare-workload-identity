@@ -1,4 +1,4 @@
-import { calculateJwkThumbprint, importJWK, type JWK } from "jose";
+import { calculateJwkThumbprint, importJWK } from "jose";
 
 export const workloadIdentityAlgorithm = "RS256";
 export const workloadIdentityTokenType = "JWT";
@@ -33,7 +33,7 @@ export interface PublicRsaJwk {
   readonly [member: string]: unknown;
 }
 
-const privateOrSymmetricJwkParameters = new Set(["d", "p", "q", "dp", "dq", "qi", "oth", "k"]);
+const privateOrSymmetricJwkParameters = ["d", "p", "q", "dp", "dq", "qi", "oth", "k"];
 
 export function requireCanonicalRootHttpsIssuer(value: unknown): string {
   if (typeof value !== "string" || value.length === 0) {
@@ -116,31 +116,27 @@ async function validatePublicRsaJwk(value: unknown): Promise<PublicRsaJwk> {
   if (!isRecord(value)) {
     throw new Error("PUBLIC_JWK_SET keys must be objects.");
   }
-  if ([...privateOrSymmetricJwkParameters].some((parameter) => parameter in value)) {
+  if (privateOrSymmetricJwkParameters.some((parameter) => parameter in value)) {
     throw new Error("PUBLIC_JWK_SET must not contain private or symmetric key material.");
   }
-  if (value["kty"] !== "RSA") {
+  const { kty, n, e, alg, use, kid } = value;
+  if (kty !== "RSA") {
     throw new Error("PUBLIC_JWK_SET keys must be RSA public keys.");
   }
-  if (
-    typeof value["n"] !== "string" ||
-    value["n"].length === 0 ||
-    typeof value["e"] !== "string" ||
-    value["e"].length === 0
-  ) {
+  if (typeof n !== "string" || n.length === 0 || typeof e !== "string" || e.length === 0) {
     throw new Error("PUBLIC_JWK_SET RSA keys must contain non-empty n and e parameters.");
   }
-  if (value["alg"] !== workloadIdentityAlgorithm || value["use"] !== "sig") {
+  if (alg !== workloadIdentityAlgorithm || use !== "sig") {
     throw new Error("PUBLIC_JWK_SET keys must declare alg RS256 and use sig.");
   }
-  if (typeof value["kid"] !== "string" || value["kid"].length === 0) {
+  if (typeof kid !== "string" || kid.length === 0) {
     throw new Error("PUBLIC_JWK_SET keys must contain a non-empty kid.");
   }
 
-  const publicKey = value as PublicRsaJwk;
+  const publicKey: PublicRsaJwk = { ...value, kty, n, e, alg, use, kid };
   let verificationKey: CryptoKey;
   try {
-    const importedKey = await importJWK(publicKey as JWK, workloadIdentityAlgorithm);
+    const importedKey = await importJWK(publicKey, workloadIdentityAlgorithm);
     if (importedKey instanceof Uint8Array || !importedKey.usages.includes("verify")) {
       throw new Error("The imported key is not usable for verification.");
     }
@@ -152,7 +148,7 @@ async function validatePublicRsaJwk(value: unknown): Promise<PublicRsaJwk> {
 
   let thumbprint: string;
   try {
-    thumbprint = await calculateJwkThumbprint(publicKey as JWK);
+    thumbprint = await calculateJwkThumbprint(publicKey);
   } catch {
     throw new Error("PUBLIC_JWK_SET contains an unusable RS256 verification key.");
   }

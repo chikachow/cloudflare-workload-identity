@@ -13,13 +13,16 @@ describe("workload identity discovery configuration", () => {
     ],
     ["an empty JWK Set", { keys: [] }, "at least one public JWK"],
   ] as const) {
-    it(`refuses to publish ${name}`, async () => {
-      await expect(
-        handleDiscoveryRequest(new Request(`${issuer}/jwks`), {
-          ISSUER: issuer,
-          PUBLIC_JWK_SET: publicJwkSet,
-        }),
-      ).rejects.toThrow(message);
-    });
+    it.each(["/.well-known/openid-configuration", "/jwks"])(
+      `refuses to serve %s with ${name}`,
+      async (path) => {
+        await expect(
+          handleDiscoveryRequest(new Request(`${issuer}${path}`), {
+            ISSUER: issuer,
+            PUBLIC_JWK_SET: publicJwkSet,
+          }),
+        ).rejects.toThrow(message);
+      },
+    );
   }
 });
