@@ -36,7 +36,5 @@ export async function handleDiscoveryRequest(
 }
 
 export default {
-  fetch(request, env: WorkloadIdentityDiscoveryEnv): Promise<Response> {
-    return handleDiscoveryRequest(request, env);
-  },
+  fetch: handleDiscoveryRequest,
 } satisfies ExportedHandler<WorkloadIdentityDiscoveryEnv>;
