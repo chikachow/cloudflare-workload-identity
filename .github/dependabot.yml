@@ -31,6 +31,5 @@ updates:
           - oxlint
       vitest:
         patterns:
-          - vite
           - vitest
           - "@vitest/*"
