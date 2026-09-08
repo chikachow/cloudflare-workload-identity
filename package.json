@@ -19,7 +19,7 @@
     "test:workerd:discovery:coverage": "WRANGLER_LOG=none WRANGLER_LOG_PATH=.wrangler/logs WRANGLER_REGISTRY_PATH=.wrangler/registry vitest run --coverage --config vitest.discovery-workers.config.ts",
     "test:workerd:issuer": "WRANGLER_LOG=none WRANGLER_LOG_PATH=.wrangler/logs WRANGLER_REGISTRY_PATH=.wrangler/registry vitest run --config vitest.issuer-workers.config.ts",
     "test:workerd:issuer:coverage": "WRANGLER_LOG=none WRANGLER_LOG_PATH=.wrangler/logs WRANGLER_REGISTRY_PATH=.wrangler/registry vitest run --coverage --config vitest.issuer-workers.config.ts",
-    "typecheck": "pnpm --recursive --filter './workers/*' run typecheck && tsc --project tsconfig.json && tsc --project tsconfig.unit.issuer.json && tsc --project tsconfig.unit.discovery.json && tsc --project tsconfig.workerd.issuer.json && tsc --project tsconfig.workerd.discovery.json",
+    "typecheck": "pnpm --recursive run typecheck && tsc --project tsconfig.json && tsc --project tsconfig.unit.issuer.json && tsc --project tsconfig.unit.discovery.json && tsc --project tsconfig.workerd.issuer.json && tsc --project tsconfig.workerd.discovery.json",
     "types:generate": "pnpm --recursive --filter './workers/*' run types:generate"
   },
   "dependencies": {

@@ -6,6 +6,7 @@
     "types": ["node"]
   },
   "include": [
+    "vitest*.config.ts",
     "packages/workload-identity-profile/src/**/*.ts",
     "test/support/**/*.ts",
     "test/workload-identity-profile.test.ts"

@@ -6,6 +6,9 @@
   "exports": {
     ".": "./src/index.ts"
   },
+  "scripts": {
+    "typecheck": "tsc --project tsconfig.json"
+  },
   "dependencies": {
     "jose": "6.2.10"
   }

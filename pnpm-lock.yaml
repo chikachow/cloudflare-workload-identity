@@ -57,6 +57,9 @@ importers:
 
   workers/workload-identity-issuer:
     dependencies:
+      jose:
+        specifier: 6.2.10
+        version: 6.2.10
       workload-identity-profile:
         specifier: workspace:*
         version: link:../../packages/workload-identity-profile
