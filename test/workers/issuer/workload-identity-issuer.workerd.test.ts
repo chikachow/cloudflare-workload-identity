@@ -13,7 +13,7 @@ describe("WorkloadIdentityIssuer workerd RPC entrypoint", () => {
     const worker = exports.WorkloadIdentityIssuer({
       props: { allowedAudiences: [audience], subject },
     });
-    const issued = await worker.issueToken(audience);
+    using issued = await worker.issueToken(audience);
     const verified = await jwtVerify(issued.token, signingPublicJwk, {
       algorithms: ["RS256"],
       audience,
@@ -31,7 +31,8 @@ describe("WorkloadIdentityIssuer workerd RPC entrypoint", () => {
     });
     let denial: unknown;
     try {
-      await worker.issueToken("https://example.invalid");
+      using call = worker.issueToken("https://example.invalid");
+      await call;
     } catch (error) {
       denial = error;
     }
