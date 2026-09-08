@@ -3,7 +3,7 @@
   "ignorePatterns": ["node_modules", "coverage", ".vitest", ".wrangler"],
   "overrides": [
     {
-      "files": ["workers/**/*.ts"],
+      "files": ["packages/**/src/**/*.ts", "workers/**/*.ts"],
       "plugins": ["unicorn", "typescript", "oxc", "import"],
       "rules": { "import/no-nodejs-modules": "deny" }
     }

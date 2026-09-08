@@ -3,5 +3,5 @@
   "compilerOptions": {
     "lib": ["ES2024", "WebWorker"]
   },
-  "include": ["../../workers/worker-runtime.generated.d.ts", "src/**/*.ts"]
+  "include": ["src/**/*.ts"]
 }
