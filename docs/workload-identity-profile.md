@@ -97,10 +97,15 @@ The five-minute lifetime bounds exposure but does not make disclosure harmless.
 ## Public-key profile and rotation
 
 The public JWK Set contains public RSA verification keys only. Each JWK must
-have usable `n` and `e`, an RSA modulus of at least 2048 bits, `kty: "RSA"`,
+have usable `n` and `e` in canonical RFC 7518 Base64urlUInt encoding, an RSA
+modulus of at least 2048 bits, `kty: "RSA"`,
 `alg: "RS256"`, `use: "sig"`, and a nonempty unique `kid`. It must contain no
 private or symmetric-key parameters, successfully import as an RS256
 verification key, and have `kid` equal to its RFC 7638 public-key thumbprint.
+The integer encodings use the URL-safe alphabet, omit padding, and use the
+minimum number of octets with zero unused pad bits. Noncanonical encodings
+are rejected rather than normalized, so the same RSA key cannot acquire
+different thumbprints through alternate encodings of its integers.
 The configured and emitted JWK Set has the canonical root shape
 `{ "keys": [...] }`; root-level extension members are not published. Per-key
 extensions are allowed only when they do not contain private or symmetric key

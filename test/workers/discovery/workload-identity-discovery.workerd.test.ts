@@ -1,7 +1,9 @@
 import { exports } from "cloudflare:workers";
+import { calculateJwkThumbprint } from "jose";
 import { describe, expect, it } from "vitest";
 
-import { signingPublicJwkSet } from "../../support/signing-key.ts";
+import { handleDiscoveryRequest } from "../../../workers/workload-identity-discovery/src/index.ts";
+import { signingPublicJwk, signingPublicJwkSet } from "../../support/signing-key.ts";
 
 const issuer = "https://issuer.example";
 
@@ -28,6 +30,21 @@ describe("workload identity discovery workerd entrypoint", () => {
     expect(response.headers.get("content-type")).toBe("application/json; charset=utf-8");
     await expect(response.json()).resolves.toEqual(signingPublicJwkSet);
   });
+
+  it.each(["/.well-known/openid-configuration", "/jwks"])(
+    "refuses to serve %s with a noncanonical RSA integer in workerd",
+    async (path) => {
+      const publicJwk = { ...signingPublicJwk, n: `${signingPublicJwk.n}==` };
+      const key = { ...publicJwk, kid: await calculateJwkThumbprint(publicJwk) };
+
+      await expect(
+        handleDiscoveryRequest(new Request(`${issuer}${path}`), {
+          ISSUER: issuer,
+          PUBLIC_JWK_SET: { keys: [key] },
+        }),
+      ).rejects.toThrow("canonical Base64urlUInt");
+    },
+  );
 
   it("rejects unsupported methods", async () => {
     const response = await exports.default.fetch(`${issuer}/jwks`, { method: "POST" });
