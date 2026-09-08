@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       jose:
-        specifier: 6.2.10
-        version: 6.2.10
+        specifier: 6.2.11
+        version: 6.2.11
     devDependencies:
       '@cloudflare/vitest-plugin':
         specifier: 1.1.5
@@ -46,8 +46,8 @@ importers:
   packages/workload-identity-profile:
     dependencies:
       jose:
-        specifier: 6.2.10
-        version: 6.2.10
+        specifier: 6.2.11
+        version: 6.2.11
 
   workers/workload-identity-discovery:
     dependencies:
@@ -58,8 +58,8 @@ importers:
   workers/workload-identity-issuer:
     dependencies:
       jose:
-        specifier: 6.2.10
-        version: 6.2.10
+        specifier: 6.2.11
+        version: 6.2.11
       workload-identity-profile:
         specifier: workspace:*
         version: link:../../packages/workload-identity-profile
@@ -1174,8 +1174,8 @@ packages:
     resolution: {integrity: sha512-HGYWWS/ehqTV3xN10i23tkPkpH46MLCIMFNCaaKNavAXTF1RkqxawEPtnjnGZ6XKSInBKkiOA5BKS+aZiY3AvA==}
     engines: {node: '>=8'}
 
-  jose@6.2.10:
-    resolution: {integrity: sha512-iiW7J9qRFlGxvCOIBDBDxFePQSn7ZMAnrYGhrrOo6siO/MIqwfyilLR27pkfDgUk+raLuzADS8A3S/KLBisc0g==}
+  jose@6.2.11:
+    resolution: {integrity: sha512-A5NPn7g8EAzGU3IzRs+Yiq8K5n3ypYS75M5+KKiVHdUexfpWK1kP4ZMq7QnTGDoMj6TJ1dtcEJjW60yZDXS4hg==}
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -2325,7 +2325,7 @@ snapshots:
       html-escaper: 2.0.2
       istanbul-lib-report: 3.0.1
 
-  jose@6.2.10: {}
+  jose@6.2.11: {}
 
   js-tokens@4.0.0: {}
 
