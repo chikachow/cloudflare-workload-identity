@@ -1,3 +1,5 @@
+import { Buffer } from "node:buffer";
+
 import { calculateJwkThumbprint, exportJWK } from "jose";
 import { describe, expect, it } from "vitest";
 
@@ -69,6 +71,17 @@ describe("workload identity profile", () => {
     ).resolves.toEqual({ keys: [key] });
   });
 
+  for (const [name, parameters] of [
+    ["a non-extractable public key", { ext: false }],
+    ["a single-octet exponent", { e: "Aw" }],
+  ] as const) {
+    it(`accepts canonical RSA parameters with ${name}`, async () => {
+      const publicJwk = { ...signingPublicJwk, ...parameters };
+      const key = { ...publicJwk, kid: await calculateJwkThumbprint(publicJwk) };
+      await expect(validatePublicJwkSet({ keys: [key] })).resolves.toEqual({ keys: [key] });
+    });
+  }
+
   for (const [name, value, message] of [
     [
       "JSON text instead of a structured binding",
@@ -100,6 +113,40 @@ describe("workload identity profile", () => {
   ] as const) {
     it(`rejects JWK Sets with ${name}`, async () => {
       await expect(validatePublicJwkSet(value)).rejects.toThrow(message);
+    });
+  }
+
+  for (const [name, parameters] of [
+    ["padded modulus", { n: `${signingPublicJwk.n}==` }],
+    ["padded exponent", { e: "AQAB=" }],
+    [
+      "standard Base64 modulus",
+      { n: signingPublicJwk.n.replaceAll("-", "+").replaceAll("_", "/") },
+    ],
+    ["whitespace in modulus", { n: `${signingPublicJwk.n}\n` }],
+    ["whitespace in exponent", { e: " AQAB" }],
+    ["invalid modulus character", { n: `${signingPublicJwk.n}!` }],
+    ["invalid exponent character", { e: "AQAB!" }],
+    ["invalid modulus length", { n: "A" }],
+    ["invalid exponent length", { e: "A" }],
+    [
+      "leading zero modulus octet",
+      {
+        n: Buffer.concat([Buffer.from([0]), Buffer.from(signingPublicJwk.n, "base64url")]).toString(
+          "base64url",
+        ),
+      },
+    ],
+    ["leading zero exponent octet", { e: "AAEAAQ" }],
+    ["nonzero unused modulus bits", { n: `${signingPublicJwk.n.slice(0, -1)}R` }],
+    ["nonzero unused exponent bits", { e: "Ax" }],
+  ] as const) {
+    it(`rejects a JWK with ${name} even when its kid matches its thumbprint`, async () => {
+      const publicJwk = { ...signingPublicJwk, ...parameters };
+      const key = { ...publicJwk, kid: await calculateJwkThumbprint(publicJwk) };
+      await expect(validatePublicJwkSet({ keys: [key] })).rejects.toThrow(
+        "n and e parameters must be canonical Base64urlUInt values",
+      );
     });
   }
 

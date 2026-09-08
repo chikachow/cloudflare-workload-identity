@@ -1,4 +1,4 @@
-import { calculateJwkThumbprint, importJWK } from "jose";
+import { base64url, calculateJwkThumbprint, importJWK } from "jose";
 
 export const workloadIdentityAlgorithm = "RS256";
 export const workloadIdentityTokenType = "JWT";
@@ -126,6 +126,11 @@ async function validatePublicRsaJwk(value: unknown): Promise<PublicRsaJwk> {
   if (typeof n !== "string" || n.length === 0 || typeof e !== "string" || e.length === 0) {
     throw new Error("PUBLIC_JWK_SET RSA keys must contain non-empty n and e parameters.");
   }
+  if (!isCanonicalBase64urlUInt(n) || !isCanonicalBase64urlUInt(e)) {
+    throw new Error(
+      "PUBLIC_JWK_SET RSA key n and e parameters must be canonical Base64urlUInt values.",
+    );
+  }
   if (alg !== workloadIdentityAlgorithm || use !== "sig") {
     throw new Error("PUBLIC_JWK_SET keys must declare alg RS256 and use sig.");
   }
@@ -157,6 +162,19 @@ async function validatePublicRsaJwk(value: unknown): Promise<PublicRsaJwk> {
   }
 
   return publicKey;
+}
+
+function isCanonicalBase64urlUInt(value: string): boolean {
+  try {
+    const bytes = base64url.decode(value);
+    return (
+      bytes.length > 0 &&
+      (bytes.length === 1 || bytes[0] !== 0) &&
+      base64url.encode(bytes) === value
+    );
+  } catch {
+    return false;
+  }
 }
 
 export function requireMinimumRsaModulusLength(key: CryptoKey, description: string): void {
