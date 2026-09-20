@@ -19,8 +19,8 @@ importers:
         specifier: 2.0.8
         version: 2.0.8
       '@types/node':
-        specifier: 24.13.4
-        version: 24.13.4
+        specifier: 24.13.5
+        version: 24.13.5
       '@vitest/coverage-istanbul':
         specifier: 4.1.11
         version: 4.1.11(vitest@4.1.11)
@@ -35,10 +35,10 @@ importers:
         version: 7.0.2
       vite:
         specifier: 8.3.0
-        version: 8.3.0(@types/node@24.13.4)(esbuild@0.28.1)
+        version: 8.3.0(@types/node@24.13.5)(esbuild@0.28.1)
       vitest:
         specifier: 4.1.11
-        version: 4.1.11(@types/node@24.13.4)(@vitest/coverage-istanbul@4.1.11)(vite@8.3.0(@types/node@24.13.4)(esbuild@0.28.1))
+        version: 4.1.11(@types/node@24.13.5)(@vitest/coverage-istanbul@4.1.11)(vite@8.3.0(@types/node@24.13.5)(esbuild@0.28.1))
       wrangler:
         specifier: 4.129.1
         version: 4.129.1
@@ -908,8 +908,8 @@ packages:
   '@types/estree@1.0.9':
     resolution: {integrity: sha512-GhdPgy1el4/ImP05X05Uw4cw2/M93BCUmnEvWZNStlCzEKME4Fkk+YpoA5OiHNQmoS7Cafb8Xa3Pya8m1Qrzeg==}
 
-  '@types/node@24.13.4':
-    resolution: {integrity: sha512-YJ7EqCstVTzIr0fMr7qul/977en+pQHrfmuKIo6Zr9i75Be21dr3MovcfvGtyvi2HAUrRerWps5sMO9I7WaxDw==}
+  '@types/node@24.13.5':
+    resolution: {integrity: sha512-TXyindR+lBr22aJIdMQzCFHPHR6cR4js838mRDCSz5hOKWZvZwsXSSiXDmjRj4iJmgl+sR9O+1mkoVBSMadNug==}
 
   '@typescript/typescript-aix-ppc64@7.0.2':
     resolution: {integrity: sha512-MTKKkWB7p/0E9xi1d1tHtZ5PiLkGEMIq88pK2CubZjOsLtYTLqhgIgi6zepFa+9GHZ6h05NMCkQxGKiPXMxXtQ==}
@@ -1671,7 +1671,7 @@ snapshots:
       cjs-module-lexer: 1.2.3
       esbuild: 0.28.1
       miniflare: 5.20260907.0-alpha
-      vitest: 4.1.11(@types/node@24.13.4)(@vitest/coverage-istanbul@4.1.11)(vite@8.3.0(@types/node@24.13.4)(esbuild@0.28.1))
+      vitest: 4.1.11(@types/node@24.13.5)(@vitest/coverage-istanbul@4.1.11)(vite@8.3.0(@types/node@24.13.5)(esbuild@0.28.1))
       wrangler: 4.129.1
       zod: 4.4.3
     transitivePeerDependencies:
@@ -2105,7 +2105,7 @@ snapshots:
 
   '@types/estree@1.0.9': {}
 
-  '@types/node@24.13.4':
+  '@types/node@24.13.5':
     dependencies:
       undici-types: 7.18.2
 
@@ -2181,7 +2181,7 @@ snapshots:
       magicast: 0.5.5
       obug: 2.2.1
       tinyrainbow: 3.1.1
-      vitest: 4.1.11(@types/node@24.13.4)(@vitest/coverage-istanbul@4.1.11)(vite@8.3.0(@types/node@24.13.4)(esbuild@0.28.1))
+      vitest: 4.1.11(@types/node@24.13.5)(@vitest/coverage-istanbul@4.1.11)(vite@8.3.0(@types/node@24.13.5)(esbuild@0.28.1))
     transitivePeerDependencies:
       - supports-color
 
@@ -2194,13 +2194,13 @@ snapshots:
       chai: 6.2.2
       tinyrainbow: 3.1.1
 
-  '@vitest/mocker@4.1.11(vite@8.3.0(@types/node@24.13.4)(esbuild@0.28.1))':
+  '@vitest/mocker@4.1.11(vite@8.3.0(@types/node@24.13.5)(esbuild@0.28.1))':
     dependencies:
       '@vitest/spy': 4.1.11
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 8.3.0(@types/node@24.13.4)(esbuild@0.28.1)
+      vite: 8.3.0(@types/node@24.13.5)(esbuild@0.28.1)
 
   '@vitest/pretty-format@4.1.11':
     dependencies:
@@ -2606,7 +2606,7 @@ snapshots:
       escalade: 3.2.0
       picocolors: 1.1.1
 
-  vite@8.3.0(@types/node@24.13.4)(esbuild@0.28.1):
+  vite@8.3.0(@types/node@24.13.5)(esbuild@0.28.1):
     dependencies:
       lightningcss: 1.33.0
       picomatch: 4.0.7
@@ -2614,14 +2614,14 @@ snapshots:
       rolldown: 1.2.9
       tinyglobby: 0.2.17
     optionalDependencies:
-      '@types/node': 24.13.4
+      '@types/node': 24.13.5
       esbuild: 0.28.1
       fsevents: 2.3.3
 
-  vitest@4.1.11(@types/node@24.13.4)(@vitest/coverage-istanbul@4.1.11)(vite@8.3.0(@types/node@24.13.4)(esbuild@0.28.1)):
+  vitest@4.1.11(@types/node@24.13.5)(@vitest/coverage-istanbul@4.1.11)(vite@8.3.0(@types/node@24.13.5)(esbuild@0.28.1)):
     dependencies:
       '@vitest/expect': 4.1.11
-      '@vitest/mocker': 4.1.11(vite@8.3.0(@types/node@24.13.4)(esbuild@0.28.1))
+      '@vitest/mocker': 4.1.11(vite@8.3.0(@types/node@24.13.5)(esbuild@0.28.1))
       '@vitest/pretty-format': 4.1.11
       '@vitest/runner': 4.1.11
       '@vitest/snapshot': 4.1.11
@@ -2638,10 +2638,10 @@ snapshots:
       tinyexec: 1.3.1
       tinyglobby: 0.2.17
       tinyrainbow: 3.1.1
-      vite: 8.3.0(@types/node@24.13.4)(esbuild@0.28.1)
+      vite: 8.3.0(@types/node@24.13.5)(esbuild@0.28.1)
       why-is-node-running: 2.3.0
     optionalDependencies:
-      '@types/node': 24.13.4
+      '@types/node': 24.13.5
       '@vitest/coverage-istanbul': 4.1.11(vitest@4.1.11)
     transitivePeerDependencies:
       - msw
