@@ -5,7 +5,9 @@ export default defineConfig({
   plugins: [
     cloudflareTest({
       remoteBindings: false,
-      wrangler: { configPath: "./workers/workload-identity-discovery/wrangler.jsonc" },
+      experimental: {
+        newConfig: { configPath: "./workers/workload-identity-discovery/cloudflare.config.ts" },
+      },
     }),
   ],
   test: {

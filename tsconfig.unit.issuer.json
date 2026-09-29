@@ -4,6 +4,7 @@
   "include": [
     "test/support/**/*.ts",
     "test/workload-identity-issuer.test.ts",
-    "workers/workload-identity-issuer/.wrangler/types/worker-configuration.d.ts"
+    "workers/workload-identity-issuer/.cloudflare/types/index.d.ts",
+    "workers/workload-identity-issuer/src/bindings.d.ts"
   ]
 }

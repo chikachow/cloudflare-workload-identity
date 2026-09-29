@@ -1,0 +1,73 @@
+{
+  "sourceRevision": "eedc56ce6be86a498c2c4affac0bef6fd047d0d2",
+  "workers": {
+    "issuer": {
+      "name": "workload-identity-issuer-example",
+      "compatibilityDate": "2026-08-04",
+      "compatibilityFlags": ["no_nodejs_compat", "no_nodejs_compat_v2"],
+      "observability": {
+        "enabled": true
+      },
+      "workersDev": false,
+      "previewUrls": false,
+      "env": {
+        "ISSUER": {
+          "type": "text",
+          "value": "https://issuer.example"
+        },
+        "SIGNING_PRIVATE_KEY": {
+          "type": "secret"
+        }
+      },
+      "manifest": {
+        "type": "complete",
+        "mainModule": "index.js",
+        "modules": {
+          "index.js": {
+            "type": "esm"
+          }
+        }
+      }
+    },
+    "discovery": {
+      "name": "workload-identity-discovery-example",
+      "compatibilityDate": "2026-08-04",
+      "compatibilityFlags": ["no_nodejs_compat", "no_nodejs_compat_v2"],
+      "observability": {
+        "enabled": true
+      },
+      "workersDev": false,
+      "previewUrls": false,
+      "env": {
+        "ISSUER": {
+          "type": "text",
+          "value": "https://issuer.example"
+        },
+        "PUBLIC_JWK_SET": {
+          "type": "json",
+          "value": {
+            "keys": [
+              {
+                "kty": "RSA",
+                "n": "r_FeDGYXOwHdy_A3i5rngP3Dg_9tcNqpVbdHrqHrtK8YA1ySRADYaFHMsFtKjLE5qDQcSVKJjHKZ38YXlaGGiz2XmIWPTk0oxToCFtXPibqg6KDgQhEPL4nEa9f1aVvpY-MstpwVx-45ZQnRis4I3__Oopf_Oe39hQbZqD37odAmuiNlWLgLbXAGJS8iinNBbv1NpPl_ECUvJ12AU3D1fMbbfhOIDf8xoHmmeNig0CwiXtkKYgO0ORPyeaj0sXnniiVD7piYGgkq1ESGF2BEVKNFdfRTBvSWJyBBAYd7zakVAo02QbJ7fXHiSfXmo_rhRB9to9hFXX0LWS_D9WdzUQ",
+                "e": "AQAB",
+                "alg": "RS256",
+                "kid": "rNUTLcAOYmwvUhobr_Q22V_hXkMnJQ_NuoBfMbGPilo",
+                "use": "sig"
+              }
+            ]
+          }
+        }
+      },
+      "manifest": {
+        "type": "complete",
+        "mainModule": "index.js",
+        "modules": {
+          "index.js": {
+            "type": "esm"
+          }
+        }
+      }
+    }
+  }
+}

@@ -15,7 +15,9 @@ export default defineConfig({
         },
       },
       remoteBindings: false,
-      wrangler: { configPath: "./workers/workload-identity-issuer/wrangler.jsonc" },
+      experimental: {
+        newConfig: { configPath: "./workers/workload-identity-issuer/cloudflare.config.ts" },
+      },
     }),
   ],
   test: {
