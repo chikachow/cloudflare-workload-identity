@@ -7,11 +7,17 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "deploy:dry-run": "WRANGLER_LOG=none WRANGLER_LOG_PATH=../../.wrangler/logs WRANGLER_REGISTRY_PATH=../../.wrangler/registry wrangler deploy --dry-run --config wrangler.jsonc",
+    "deploy:dry-run": "node --run build && cf deploy --prebuilt --dry-run",
     "typecheck": "node --run types:generate && tsc --project tsconfig.json",
-    "types:generate": "node -e \"require('node:fs').mkdirSync('.wrangler/types', { recursive: true })\" && WRANGLER_LOG=none WRANGLER_LOG_PATH=../../.wrangler/logs WRANGLER_REGISTRY_PATH=../../.wrangler/registry wrangler types .wrangler/types/worker-configuration.d.ts --config wrangler.jsonc --env-interface WorkloadIdentityDiscoveryBindings --strict-vars false"
+    "types:generate": "cf workers types",
+    "build": "cf build",
+    "dev": "cf dev"
   },
   "dependencies": {
     "workload-identity-profile": "workspace:*"
+  },
+  "devDependencies": {
+    "cf": "1.0.0-beta.5",
+    "wrangler": "4.143.0"
   }
 }
