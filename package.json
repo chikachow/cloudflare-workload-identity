@@ -26,7 +26,7 @@
     "jose": "6.2.12"
   },
   "devDependencies": {
-    "@cloudflare/vitest-plugin": "1.1.12",
+    "@cloudflare/vitest-plugin": "1.2.8",
     "@tsconfig/strictest": "2.0.8",
     "@types/node": "24.13.6",
     "@vitest/coverage-istanbul": "4.1.11",
@@ -35,7 +35,7 @@
     "typescript": "7.0.2",
     "vite": "8.3.0",
     "vitest": "4.1.11",
-    "wrangler": "4.134.0"
+    "wrangler": "4.141.0"
   },
   "engines": {
     "node": "24"
