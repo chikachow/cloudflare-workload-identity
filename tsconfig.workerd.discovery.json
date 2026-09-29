@@ -6,6 +6,7 @@
   },
   "include": [
     "test/workers/discovery/**/*.ts",
-    "workers/workload-identity-discovery/.wrangler/types/worker-configuration.d.ts"
+    "workers/workload-identity-discovery/.cloudflare/types/index.d.ts",
+    "workers/workload-identity-discovery/src/bindings.d.ts"
   ]
 }

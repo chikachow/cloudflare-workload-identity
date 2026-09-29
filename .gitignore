@@ -2,3 +2,6 @@ node_modules/
 .vitest/
 .wrangler/
 coverage/
+.cloudflare/
+.dev.vars
+.dev.vars.*
