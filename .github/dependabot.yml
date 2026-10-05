@@ -30,9 +30,11 @@ updates:
         patterns:
           - "@cloudflare/vitest-plugin"
           - wrangler
-          - vitest
-          - "@vitest/*"
       oxc-tooling:
         patterns:
           - oxfmt
           - oxlint
+      vitest:
+        patterns:
+          - vitest
+          - "@vitest/*"
