@@ -33,3 +33,6 @@ updates:
         patterns:
           - vitest
           - "@vitest/*"
+      vite:
+        patterns:
+          - "vite"
