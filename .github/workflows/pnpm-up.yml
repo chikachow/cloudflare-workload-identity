@@ -24,6 +24,15 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
+      - name: Enable Corepack shims
+        run: |
+          mkdir -p "$RUNNER_TEMP/corepack"
+          corepack enable --install-directory "$RUNNER_TEMP/corepack"
+          echo "$RUNNER_TEMP/corepack" >> "$GITHUB_PATH"
+
+      - name: Verify pinned pnpm version
+        run: node --run pnpm:check
+
       - run: pnpm up -r
       - run: pnpm dedupe
       - uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1

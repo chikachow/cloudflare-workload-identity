@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "node --run lockfile:check && node --run peer-dependencies:check && node --run dedupe:check && node --run format:check && node --run lint && node --run typecheck && node --run test && node --run deploy:dry-run",
+    "check": "node --run pnpm:check && node --run lockfile:check && node --run peer-dependencies:check && node --run dedupe:check && node --run format:check && node --run lint && node --run typecheck && node --run test && node --run deploy:dry-run",
     "dedupe:check": "pnpm dedupe --check --ignore-scripts",
     "deploy:dry-run": "pnpm --recursive --filter './workers/*' run deploy:dry-run",
     "format": "oxfmt . '!docs/research/oauth-oidc-terminology.md'",
@@ -12,7 +12,8 @@
     "lint": "oxlint --report-unused-disable-directives --deny-warnings .",
     "lint:fix": "oxlint --fix .",
     "lockfile:check": "pnpm install --lockfile-only --frozen-lockfile",
-    "peer-dependencies:check": "pnpm install --resolution-only --strict-peer-dependencies --no-frozen-lockfile --ignore-scripts",
+    "peer-dependencies:check": "pnpm peers check",
+    "pnpm:check": "node scripts/check-pnpm.mjs",
     "test": "node --run test:unit && node --run test:workerd:issuer && node --run test:workerd:discovery",
     "test:coverage": "node --run test:unit:coverage && node --run test:workerd:issuer:coverage && node --run test:workerd:discovery:coverage",
     "test:unit": "WRANGLER_LOG=none WRANGLER_LOG_PATH=.wrangler/logs WRANGLER_REGISTRY_PATH=.wrangler/registry vitest run --config vitest.config.ts",
@@ -42,5 +43,5 @@
   "engines": {
     "node": "24"
   },
-  "packageManager": "pnpm@10.33.0"
+  "packageManager": "pnpm@12.11.2"
 }
