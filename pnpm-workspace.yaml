@@ -4,6 +4,7 @@ packages:
 
 autoInstallPeers: false
 engineStrict: true
+strictPeerDependencies: false
 
 minimumReleaseAgeExclude:
   - "@cloudflare/workerd-darwin-64@1.20260907.1"
