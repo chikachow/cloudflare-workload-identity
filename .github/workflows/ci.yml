@@ -24,8 +24,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: node --run check
-      - name: Verify lockfile is unchanged
-        run: git diff --exit-code -- pnpm-lock.yaml
+      - run: git diff --exit-code -- pnpm-lock.yaml
 
   coverage:
     name: coverage
