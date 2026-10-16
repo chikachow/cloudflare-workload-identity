@@ -22,15 +22,13 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
-      - name: Verify pinned pnpm version
-        run: node --run pnpm:check
+      - run: node --run pnpm:check
 
       - run: pnpm install --frozen-lockfile
       - run: node --run check
       - run: git diff --exit-code -- pnpm-lock.yaml
 
   coverage:
-    name: coverage
     permissions:
       contents: read
       id-token: write
@@ -45,8 +43,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
-      - name: Verify pinned pnpm version
-        run: node --run pnpm:check
+      - run: node --run pnpm:check
 
       - run: pnpm install --frozen-lockfile
       - run: node --run test:coverage
