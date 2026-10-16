@@ -16,19 +16,8 @@ pnpm install --frozen-lockfile
 node --run check
 ```
 
-Dependency updates allow intermediate peer conflicts while Dependabot assembles
-its grouped updates (`strictPeerDependencies: false`). Required peers remain
-explicit through `autoInstallPeers: false`. `node --run check` first validates
-manifest/lockfile consistency, then runs these dependency gates:
-
-- `node --run peer-dependencies:check` runs `pnpm peers check`, rejecting missing
-  required peers and incompatible versions without changing the lockfile,
-  including in a permissively generated lockfile. A frozen install alone does
-  not revalidate peer requirements. CI rejects a lockfile diff after validation.
-- `node --run dedupe:check` checks whether pnpm could consolidate the lockfile
-  without editing it. Incompatible ranges and distinct peer contexts can still
-  require multiple versions. To apply deduplication, run
-  `pnpm dedupe --ignore-scripts`, review the diff, and repeat the checks.
+See [dependency tooling](#dependency-tooling) for the dependency update policy
+and validation gates.
 
 Worker type checking generates ignored `.wrangler/types/worker-configuration.d.ts` files independently from each Worker's Wrangler configuration. Run `node --run types:generate` after installation to prime editor tooling; `node --run typecheck` and `node --run check` regenerate them automatically.
 
@@ -52,10 +41,24 @@ check. `pmOnFail: ignore` keeps the lockfile as one YAML document for GitHub's
 dependency graph; direct pnpm commands do not automatically select or enforce the
 pin. Adding config dependencies requires reviewing that compatibility assumption.
 
+Dependency updates allow intermediate peer conflicts while Dependabot assembles
+its grouped updates (`strictPeerDependencies: false`). Required peers remain
+explicit through `autoInstallPeers: false`. `node --run check` first validates
+manifest/lockfile consistency, then runs these dependency gates:
+
+- `node --run peer-dependencies:check` runs `pnpm peers check`, rejecting missing
+  required peers and incompatible versions without changing the lockfile,
+  including in a permissively generated lockfile. A frozen install alone does
+  not revalidate peer requirements. CI rejects a lockfile diff after validation.
+- `node --run dedupe:check` checks whether pnpm could consolidate the lockfile
+  without editing it. Incompatible ranges and distinct peer contexts can still
+  require multiple versions. To apply deduplication, run
+  `pnpm dedupe --ignore-scripts`, review the diff, and repeat the checks.
+
 `autoDedupe` consolidates compatible resolutions during updates, including across
 workspace projects outside a command's filter. Frozen installs leave the graph
 unchanged; `lockfile.includeResolutionSettings` records the selected deduplication
-and linking settings. Keep the frozen-lockfile, peer and dedupe validation gates.
+and linking settings.
 `verifyDepsBeforeRun: error` stops pnpm scripts when dependencies are stale; it
 does not guard `node --run`, so install explicitly before validation.
 
