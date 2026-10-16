@@ -55,6 +55,13 @@ manifest/lockfile consistency, then runs these dependency gates:
   require multiple versions. To apply deduplication, run
   `pnpm dedupe --ignore-scripts`, review the diff, and repeat the checks.
 
+The scheduled `pnpm-up` workflow updates pnpm to the latest stable release,
+including new majors, using the same release-age policy. The step explicitly
+forwards that policy because `self-update` ignores project release-age settings.
+It overrides `pmOnFail` for this command so the manifest pin is updated. A changed
+`packageManager` pin is committed before dependencies are updated with that
+version; unchanged pins do not create empty commits.
+
 `autoDedupe` consolidates compatible resolutions during updates, including across
 workspace projects outside a command's filter. Frozen installs leave the graph
 unchanged; `lockfile.includeResolutionSettings` records the selected deduplication
