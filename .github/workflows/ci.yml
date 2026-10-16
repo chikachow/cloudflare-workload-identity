@@ -22,8 +22,6 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
-      - run: node --run pnpm:check
-
       - run: pnpm install --frozen-lockfile
       - run: node --run check
       - run: git diff --exit-code -- pnpm-lock.yaml
@@ -43,8 +41,6 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
-      - run: node --run pnpm:check
-
       - run: pnpm install --frozen-lockfile
       - run: node --run test:coverage
       - name: Upload coverage to Codecov
