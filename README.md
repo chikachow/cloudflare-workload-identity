@@ -9,8 +9,10 @@ The workspace contains two deployable Workers:
 
 Production deployment configuration, the signing-key binding, custom domain, and source revision live in the private `chikachow/cloudflare-workload-identity-deploy` repository. The source Wrangler files are example-only, public-safe templates used for local checks and dry-runs. They use `*-example` Worker names, `https://issuer.example`, and disable both `workers.dev` and preview URLs; they are not production deployment configuration.
 
+Install the [pinned pnpm version](#dependency-tooling) first.
+
 ```bash
-corepack pnpm install --frozen-lockfile
+pnpm install --frozen-lockfile
 node --run check
 ```
 
@@ -34,14 +36,21 @@ The production issuer identifier is `https://workload-identity.chikachow.org`. S
 
 ## Dependency tooling
 
-Use Node 24 with Corepack shims first on `PATH` (`corepack enable`), then run
-`corepack pnpm` from this repository's directory. `packageManager`
-is the single pnpm version pin. CI installs that version with `pnpm/action-setup`,
-prepends Corepack shims to `PATH`, and runs `node --run pnpm:check` before dependency
-commands. Shims also select the correct version for nested script invocations. Direct global pnpm
-invocations do not enforce the pin: `pmOnFail: ignore` keeps the lockfile as one
-YAML document for GitHub's dependency graph. Adding config dependencies requires
-reviewing that compatibility assumption.
+Use Node 24 and the exact pnpm version in `packageManager`. Install it from the
+repository root, then verify it before installing dependencies. When migrating
+an existing Corepack installation, run `corepack disable pnpm` once first to
+remove its pnpm shims.
+
+```bash
+npm install --global "$(node -p 'require("./package.json").packageManager')"
+node --run pnpm:check
+pnpm install --frozen-lockfile
+```
+
+CI installs the manifest pin with `pnpm/action-setup` and runs the same version
+check. `pmOnFail: ignore` keeps the lockfile as one YAML document for GitHub's
+dependency graph; direct pnpm commands do not automatically select or enforce the
+pin. Adding config dependencies requires reviewing that compatibility assumption.
 
 `autoDedupe` consolidates compatible resolutions during updates, including across
 workspace projects outside a command's filter. Frozen installs leave the graph
