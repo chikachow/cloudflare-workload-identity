@@ -2,6 +2,8 @@
 
 A workload identity issuer with OIDC-compatible discovery metadata for Cloudflare Workers. It is not a general OpenID Provider and has no authorization or token endpoint.
 
+See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution and verification requirements, and [AGENTS.md](AGENTS.md) for repository agent guidance.
+
 The workspace contains two deployable Workers:
 
 - `workload-identity-issuer` is private and reachable only through an RPC Service Binding. Each binding supplies an immutable workload `subject` and exact `allowedAudiences`; callers can request only an audience.
