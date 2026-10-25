@@ -39,8 +39,10 @@ export async function issueWorkloadIdentityToken(
   audience: unknown,
   env: WorkloadIdentityIssuerEnv,
   props: WorkloadIdentityIssuerProps,
-  now = Math.floor(Date.now() / 1_000),
+  now?: number,
 ): Promise<IssuedToken> {
+  const startedAt = Math.floor(Date.now() / 1_000);
+  const issuedAt = now ?? startedAt;
   const issuer = requireCanonicalRootHttpsIssuer(env.ISSUER);
   const workload = authorizeWorkload(audience, props);
   const { privateKey, kid } = await loadSigningKey(env.SIGNING_PRIVATE_KEY);
@@ -50,10 +52,16 @@ export async function issueWorkloadIdentityToken(
     .setIssuer(issuer)
     .setSubject(workload.subject)
     .setAudience(workload.audience)
-    .setIssuedAt(now)
-    .setExpirationTime(now + tokenLifetimeSeconds)
+    .setIssuedAt(issuedAt)
+    .setExpirationTime(issuedAt + tokenLifetimeSeconds)
     .setJti(crypto.randomUUID())
     .sign(privateKey);
+
+  // Bound outstanding old-key requests by their start time during rotation.
+  // Do not return a credential whose lifetime elapsed while loading or signing.
+  if (Math.floor(Date.now() / 1_000) >= startedAt + tokenLifetimeSeconds) {
+    throw new Error("Workload identity token issuance expired. Retry the request.");
+  }
 
   return { token };
 }
@@ -86,10 +94,24 @@ function authorizeWorkload(
   return { audience, subject: validatedSubject };
 }
 
-async function loadSigningKey(
-  binding: SigningPrivateKeySource,
-): Promise<{ privateKey: CryptoKey; kid: string }> {
-  const value = typeof binding === "string" ? binding : await binding.get();
+async function loadSigningKey(binding: unknown): Promise<{ privateKey: CryptoKey; kid: string }> {
+  let value: unknown;
+  if (typeof binding === "string") {
+    value = binding;
+  } else if (
+    typeof binding === "object" &&
+    binding !== null &&
+    !Array.isArray(binding) &&
+    "get" in binding &&
+    typeof binding.get === "function"
+  ) {
+    value = await binding.get();
+  } else {
+    throw new Error("SIGNING_PRIVATE_KEY must be a string or a Secrets Store binding.");
+  }
+  if (typeof value !== "string") {
+    throw new Error("SIGNING_PRIVATE_KEY must resolve to a string.");
+  }
   if (value.trim().length === 0) {
     throw new Error("SIGNING_PRIVATE_KEY is empty.");
   }

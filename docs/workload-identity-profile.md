@@ -79,7 +79,11 @@ token-controlled header.
 
 The signed payload contains exactly the registered claims `iss`, `sub`, `aud`,
 `iat`, `exp`, and `jti`; `iat` and `exp` are integer NumericDate values. The
-lifetime is exactly five minutes. `exp` is the sole expiration value in the RPC
+lifetime is exactly five minutes from the start of issuance, including time
+spent retrieving the signing key and signing. An attempt that completes at or
+after its expiration fails instead of returning an expired token; callers may
+make a new request. Keeping this request-start bound also limits outstanding
+old-key attempts during rotation. `exp` is the sole expiration value in the RPC
 contract: `IssuedToken` contains only `token`, so callers derive any expiry
 information from the signed JWT rather than an unsigned duplicate.
 
