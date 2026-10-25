@@ -2,6 +2,13 @@ packages:
   - "packages/*"
   - "workers/*"
 
+# Conditional overrides retire when upstream moves off these affected pins.
+overrides:
+  # https://github.com/advisories/GHSA-mrhx-c7xc-m3w5
+  "zod@4.6.5": "4.6.7"
+  # https://github.com/nodejs/undici/releases/tag/v7.30.1
+  "undici@7.29.1": "7.30.1"
+
 minimumReleaseAgeExclude:
   - "@cloudflare/workerd-darwin-64@1.20260907.1"
   - "@cloudflare/workerd-darwin-arm64@1.20260907.1"
