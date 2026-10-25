@@ -21,24 +21,41 @@ describe("WorkloadIdentityIssuer workerd RPC entrypoint", () => {
     });
 
     expect(issued).toEqual({ token: expect.any(String) });
-    expect(verified.protectedHeader).toMatchObject({ alg: "RS256", kid: signingPublicJwk.kid });
-    expect(verified.payload).toMatchObject({ aud: audience, iss: issuer, sub: subject });
+    expect(verified.protectedHeader).toEqual({
+      alg: "RS256",
+      kid: signingPublicJwk.kid,
+      typ: "JWT",
+    });
+    expect(verified.payload).toEqual({
+      aud: audience,
+      iss: issuer,
+      sub: subject,
+      iat: expect.any(Number),
+      exp: expect.any(Number),
+      jti: expect.any(String),
+    });
+    expect(Number.isInteger(verified.payload.iat)).toBe(true);
+    expect(Number.isInteger(verified.payload.exp)).toBe(true);
+    expect(verified.payload.exp! - verified.payload.iat!).toBe(300);
   });
 
-  it("transports AudienceNotAllowedError", async () => {
-    const worker = exports.WorkloadIdentityIssuer({
-      props: { allowedAudiences: [audience], subject },
-    });
-    let denial: unknown;
-    try {
-      using call = worker.issueToken("https://example.invalid");
-      await call;
-    } catch (error) {
-      denial = error;
-    }
-    expect(denial).toMatchObject({
-      message: "The requested audience is not allowed.",
-      name: "AudienceNotAllowedError",
-    });
-  });
+  it.each(["https://example.invalid", "", null, 42, [audience]].map((value) => [value]))(
+    "transports AudienceNotAllowedError for %j",
+    async (requestedAudience) => {
+      const worker = exports.WorkloadIdentityIssuer({
+        props: { allowedAudiences: [audience], subject },
+      });
+      let denial: unknown;
+      try {
+        using call = worker.issueToken(requestedAudience as never);
+        await call;
+      } catch (error) {
+        denial = error;
+      }
+      expect(denial).toMatchObject({
+        message: "The requested audience is not allowed.",
+        name: "AudienceNotAllowedError",
+      });
+    },
+  );
 });
