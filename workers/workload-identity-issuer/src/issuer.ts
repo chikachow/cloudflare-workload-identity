@@ -39,10 +39,8 @@ export async function issueWorkloadIdentityToken(
   audience: unknown,
   env: WorkloadIdentityIssuerEnv,
   props: WorkloadIdentityIssuerProps,
-  now?: number,
 ): Promise<IssuedToken> {
   const startedAt = Math.floor(Date.now() / 1_000);
-  const issuedAt = now ?? startedAt;
   const issuer = requireCanonicalRootHttpsIssuer(env.ISSUER);
   const workload = authorizeWorkload(audience, props);
   const { privateKey, kid } = await loadSigningKey(env.SIGNING_PRIVATE_KEY);
@@ -52,8 +50,8 @@ export async function issueWorkloadIdentityToken(
     .setIssuer(issuer)
     .setSubject(workload.subject)
     .setAudience(workload.audience)
-    .setIssuedAt(issuedAt)
-    .setExpirationTime(issuedAt + tokenLifetimeSeconds)
+    .setIssuedAt(startedAt)
+    .setExpirationTime(startedAt + tokenLifetimeSeconds)
     .setJti(crypto.randomUUID())
     .sign(privateKey);
 

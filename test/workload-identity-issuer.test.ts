@@ -44,30 +44,35 @@ describe("WorkloadIdentityIssuer RPC issueToken", () => {
 
   it("issues an RS256 token with exactly the closed claim contract", async () => {
     const now = 1_775_000_000;
-    const issued = await issueWorkloadIdentityToken(audience, validEnv, validProps, now);
-    const verified = await jwtVerify(issued.token, signingPublicJwk, {
-      algorithms: ["RS256"],
-      audience,
-      currentDate: new Date(now * 1_000),
-      issuer,
-    });
+    const clock = vi.spyOn(Date, "now").mockReturnValue(now * 1_000 + 999);
+    try {
+      const issued = await issueWorkloadIdentityToken(audience, validEnv, validProps);
+      const verified = await jwtVerify(issued.token, signingPublicJwk, {
+        algorithms: ["RS256"],
+        audience,
+        currentDate: new Date(now * 1_000),
+        issuer,
+      });
 
-    expect(issued).toEqual({ token: expect.any(String) });
-    expect(verified.protectedHeader).toEqual({
-      alg: "RS256",
-      kid: signingPublicJwk.kid,
-      typ: "JWT",
-    });
-    expect(verified.payload).toEqual({
-      aud: audience,
-      exp: now + 300,
-      iat: now,
-      iss: issuer,
-      jti: expect.stringMatching(
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu,
-      ),
-      sub: subject,
-    });
+      expect(issued).toEqual({ token: expect.any(String) });
+      expect(verified.protectedHeader).toEqual({
+        alg: "RS256",
+        kid: signingPublicJwk.kid,
+        typ: "JWT",
+      });
+      expect(verified.payload).toEqual({
+        aud: audience,
+        exp: now + 300,
+        iat: now,
+        iss: issuer,
+        jti: expect.stringMatching(
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu,
+        ),
+        sub: subject,
+      });
+    } finally {
+      clock.mockRestore();
+    }
   });
 
   it("resolves a Secrets Store binding without exposing it to callers", async () => {
