@@ -110,6 +110,12 @@ The integer encodings use the URL-safe alphabet, omit padding, and use the
 minimum number of octets with zero unused pad bits. Noncanonical encodings
 are rejected rather than normalized, so the same RSA key cannot acquire
 different thumbprints through alternate encodings of its integers.
+The modulus must be odd, and the public exponent must be odd and satisfy
+`3 <= e < n`. These basic public-parameter checks follow RFC 8017 section 3.1
+and apply before runtime key import, whose validation differs between engines.
+They do not establish that the modulus is a product of distinct primes or that
+the exponent is coprime to the private key's Carmichael function; deployment
+owners remain responsible for correct key generation.
 The configured and emitted JWK Set has the canonical root shape
 `{ "keys": [...] }`; root-level extension members are not published. Per-key
 extensions are allowed only when they do not contain private or symmetric key
@@ -145,6 +151,7 @@ may still accept a workload identity token signed with it.
 - [RFC 7518 §3.3: RSASSA-PKCS1-v1_5 using SHA-256](https://www.rfc-editor.org/rfc/rfc7518#section-3.3)
 - [RFC 7519: JSON Web Token](https://www.rfc-editor.org/rfc/rfc7519)
 - [RFC 7638: JSON Web Key Thumbprint](https://www.rfc-editor.org/rfc/rfc7638)
+- [RFC 8017 §3.1: RSA Public Key](https://www.rfc-editor.org/rfc/rfc8017#section-3.1)
 - [RFC 8725: JSON Web Token Best Current Practices](https://www.rfc-editor.org/rfc/rfc8725)
 - [OpenID Connect Core 1.0](https://openid.net/specs/openid-connect-core-1_0.html)
 - [OpenID Connect Discovery 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html)

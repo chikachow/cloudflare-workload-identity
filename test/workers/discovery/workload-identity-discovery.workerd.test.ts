@@ -46,6 +46,20 @@ describe("workload identity discovery workerd entrypoint", () => {
     },
   );
 
+  it.each(["/.well-known/openid-configuration", "/jwks"])(
+    "refuses to serve %s with an invalid RSA exponent in workerd",
+    async (path) => {
+      const publicJwk = { ...signingPublicJwk, e: "AQ" };
+      const key = { ...publicJwk, kid: await calculateJwkThumbprint(publicJwk) };
+      await expect(
+        handleDiscoveryRequest(new Request(`${issuer}${path}`), {
+          ISSUER: issuer,
+          PUBLIC_JWK_SET: { keys: [key] },
+        }),
+      ).rejects.toThrow("odd modulus and an odd exponent between 3 and n - 1");
+    },
+  );
+
   it("rejects unsupported methods", async () => {
     const response = await exports.default.fetch(`${issuer}/jwks`, { method: "POST" });
     expect(response.status).toBe(405);

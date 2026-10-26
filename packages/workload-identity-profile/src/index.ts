@@ -126,9 +126,16 @@ async function validatePublicRsaJwk(value: unknown): Promise<PublicRsaJwk> {
   if (typeof n !== "string" || n.length === 0 || typeof e !== "string" || e.length === 0) {
     throw new Error("PUBLIC_JWK_SET RSA keys must contain non-empty n and e parameters.");
   }
-  if (!isCanonicalBase64urlUInt(n) || !isCanonicalBase64urlUInt(e)) {
+  const modulus = parseCanonicalBase64urlUInt(n);
+  const exponent = parseCanonicalBase64urlUInt(e);
+  if (modulus === null || exponent === null) {
     throw new Error(
       "PUBLIC_JWK_SET RSA key n and e parameters must be canonical Base64urlUInt values.",
+    );
+  }
+  if (modulus % 2n !== 1n || exponent < 3n || exponent % 2n !== 1n || exponent >= modulus) {
+    throw new Error(
+      "PUBLIC_JWK_SET RSA keys must have an odd modulus and an odd exponent between 3 and n - 1.",
     );
   }
   if (alg !== workloadIdentityAlgorithm || use !== "sig") {
@@ -164,16 +171,19 @@ async function validatePublicRsaJwk(value: unknown): Promise<PublicRsaJwk> {
   return publicKey;
 }
 
-function isCanonicalBase64urlUInt(value: string): boolean {
+function parseCanonicalBase64urlUInt(value: string): bigint | null {
   try {
     const bytes = base64url.decode(value);
-    return (
-      bytes.length > 0 &&
-      (bytes.length === 1 || bytes[0] !== 0) &&
-      base64url.encode(bytes) === value
-    );
+    if (
+      bytes.length === 0 ||
+      (bytes.length > 1 && bytes[0] === 0) ||
+      base64url.encode(bytes) !== value
+    ) {
+      return null;
+    }
+    return bytes.reduce((integer, byte) => integer * 256n + BigInt(byte), 0n);
   } catch {
-    return false;
+    return null;
   }
 }
 
