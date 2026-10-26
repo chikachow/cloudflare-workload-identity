@@ -1,5 +1,6 @@
 import { calculateJwkThumbprint, importPKCS8, SignJWT } from "jose";
 import {
+  isNonEmptyStringOrUri,
   requireCanonicalRootHttpsIssuer,
   requireMinimumRsaModulusLength,
   requireOpaqueWorkloadSubject,
@@ -83,6 +84,9 @@ function authorizeWorkload(
     )
   ) {
     throw new Error("Workload identity binding allowedAudiences must contain non-empty strings.");
+  }
+  if (!allowedAudiences.every(isNonEmptyStringOrUri)) {
+    throw new Error("Workload identity binding allowedAudiences must contain StringOrURI values.");
   }
 
   if (typeof audience !== "string" || !allowedAudiences.includes(audience)) {

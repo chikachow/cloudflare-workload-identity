@@ -43,6 +43,15 @@ reassigned. Because it is public in a signed token, equal subjects let
 recipients correlate that workload's activity. Deployments must choose values
 with that public correlation property in mind.
 
+Both `sub` and `aud` follow RFC 7519's `StringOrURI` syntax. A value containing
+`:` must be a URI under RFC 3986's generic syntax, including any fragment.
+Colon-free values remain opaque strings. Values are compared and emitted
+exactly, without case folding, percent decoding, or URI normalization.
+Scheme-specific recipient requirements remain the deployment owner's
+responsibility. The subject's ASCII, length, and surrounding-whitespace rules
+are additional profile restrictions; neither JWT nor OIDC requires
+printable-only ASCII subjects.
+
 `aud` is one exact, deployment-approved recipient identifier encoded as a JSON
 string, not an array. Each RPC binding
 provides `allowedAudiences`; the issuer accepts only an exact nonempty member
@@ -150,6 +159,7 @@ may still accept a workload identity token signed with it.
 - [RFC 7517: JSON Web Key](https://www.rfc-editor.org/rfc/rfc7517)
 - [RFC 7518 §3.3: RSASSA-PKCS1-v1_5 using SHA-256](https://www.rfc-editor.org/rfc/rfc7518#section-3.3)
 - [RFC 7519: JSON Web Token](https://www.rfc-editor.org/rfc/rfc7519)
+- [RFC 3986 Appendix A: URI syntax](https://www.rfc-editor.org/rfc/rfc3986#appendix-A)
 - [RFC 7638: JSON Web Key Thumbprint](https://www.rfc-editor.org/rfc/rfc7638)
 - [RFC 8017 §3.1: RSA Public Key](https://www.rfc-editor.org/rfc/rfc8017#section-3.1)
 - [RFC 8725: JSON Web Token Best Current Practices](https://www.rfc-editor.org/rfc/rfc8725)

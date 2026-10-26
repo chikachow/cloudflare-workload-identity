@@ -48,6 +48,60 @@ describe("workload identity profile", () => {
     );
   });
 
+  it.each([
+    "opaque\u0000subject",
+    "opaque\nsubject",
+    "opaque\u007fsubject",
+    "a".repeat(255),
+    "x:",
+    "x:/",
+    "x://",
+    "x:#fragment",
+    "x://host:",
+    "x://host:999999/",
+    "x://user:password@host/a%20b?c=d#fragment",
+    "x://[::]/",
+    "x://[::1]/",
+    "x://[2001:db8:0:0:0:0:2:1]/",
+    "x://[2001:db8::2:1]/",
+    "x://[::ffff:192.0.2.128]/",
+    "x://[1:2:3:4:5:6:192.0.2.1]/",
+    "x://[v1.name]/",
+    "x://[VF.a:b]/",
+    "URN:Example:a%2fb/../c?d/e?f#g/h?i",
+  ])("preserves a valid StringOrURI subject %j", (value) => {
+    expect(requireOpaqueWorkloadSubject(value)).toBe(value);
+  });
+
+  it.each([
+    "1:workload",
+    ":workload",
+    "x:a b",
+    "x:a\nb",
+    "x:a\u0000b",
+    "x:a\u007fb",
+    "x:%",
+    "x:%0",
+    "x:%GG",
+    "x:a[b]",
+    "x:a\\b",
+    "x:a#b#c",
+    "x://user@@host/",
+    "x://host:abc/",
+    "x://[bad]/",
+    "x://[1:2:3]/",
+    "x://[1:2:3:4:5:6:7:8:9]/",
+    "x://[1:2:3:4:5:6:7:8::]/",
+    "x://[1::2::3]/",
+    "x://[:::]/",
+    "x://[::ffff:192.0.2.999]/",
+    "x://[::ffff:192.00.2.1]/",
+    "x://[192.0.2.1::]/",
+    "x://[v1.]/",
+  ])("rejects a subject with invalid URI syntax %j", (value) => {
+    expect(() => requireOpaqueWorkloadSubject(value)).toThrow("StringOrURI");
+  });
+
   for (const [name, invalidSubject] of [
     ["empty", ""],
     ["leading whitespace", " subject"],
