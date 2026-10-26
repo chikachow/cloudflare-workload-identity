@@ -1,5 +1,9 @@
 import { base64url, calculateJwkThumbprint, importJWK } from "jose";
 
+import { isNonEmptyStringOrUri } from "./string-or-uri.ts";
+
+export { isNonEmptyStringOrUri } from "./string-or-uri.ts";
+
 export const workloadIdentityAlgorithm = "RS256";
 export const workloadIdentityTokenType = "JWT";
 export const workloadIdentityTokenLifetimeSeconds = 300;
@@ -73,6 +77,9 @@ export function requireOpaqueWorkloadSubject(value: unknown): string {
     throw new Error(
       "Workload identity binding subject must be 1-255 ASCII characters without surrounding whitespace.",
     );
+  }
+  if (!isNonEmptyStringOrUri(value)) {
+    throw new Error("Workload identity binding subject must be a StringOrURI.");
   }
 
   return value;
