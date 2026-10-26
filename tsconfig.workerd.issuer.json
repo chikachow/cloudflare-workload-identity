@@ -7,6 +7,7 @@
   "include": [
     "test/support/**/*.ts",
     "test/workers/issuer/**/*.ts",
-    "workers/workload-identity-issuer/.wrangler/types/worker-configuration.d.ts"
+    "workers/workload-identity-issuer/.cloudflare/types/index.d.ts",
+    "workers/workload-identity-issuer/src/bindings.d.ts"
   ]
 }

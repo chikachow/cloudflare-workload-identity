@@ -2,13 +2,6 @@ packages:
   - "packages/*"
   - "workers/*"
 
-minimumReleaseAgeExclude:
-  - "@cloudflare/workerd-darwin-64@1.20260907.1"
-  - "@cloudflare/workerd-darwin-arm64@1.20260907.1"
-  - "@cloudflare/workerd-linux-64@1.20260907.1"
-  - "@cloudflare/workerd-linux-arm64@1.20260907.1"
-  - "@cloudflare/workerd-windows-64@1.20260907.1"
-
 autoInstallPeers: false
 strictPeerDependencies: false
 engineStrict: true
