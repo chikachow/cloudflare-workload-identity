@@ -150,6 +150,34 @@ describe("workload identity profile", () => {
     });
   }
 
+  const evenModulus = Buffer.from(signingPublicJwk.n, "base64url");
+  evenModulus[evenModulus.length - 1]! &= 0xfe;
+  for (const [name, parameters] of [
+    ["zero exponent", { e: "AA" }],
+    ["unit exponent", { e: "AQ" }],
+    ["exponent two", { e: "Ag" }],
+    ["even exponent above three", { e: "BA" }],
+    ["multi-octet even exponent", { e: "AQAA" }],
+    ["exponent equal to the modulus", { e: signingPublicJwk.n }],
+    [
+      "exponent larger than the modulus",
+      {
+        e: Buffer.concat([Buffer.from(signingPublicJwk.n, "base64url"), Buffer.from([1])]).toString(
+          "base64url",
+        ),
+      },
+    ],
+    ["even modulus", { n: evenModulus.toString("base64url") }],
+  ] as const) {
+    it(`rejects an RSA key with ${name} even when its kid matches`, async () => {
+      const publicJwk = { ...signingPublicJwk, ...parameters };
+      const key = { ...publicJwk, kid: await calculateJwkThumbprint(publicJwk) };
+      await expect(validatePublicJwkSet({ keys: [key] })).rejects.toThrow(
+        "odd modulus and an odd exponent between 3 and n - 1",
+      );
+    });
+  }
+
   it("rejects RSA public keys below the shared 2048-bit minimum", async () => {
     const keyPair = await crypto.subtle.generateKey(
       {
