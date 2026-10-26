@@ -9,13 +9,6 @@ overrides:
   # https://github.com/nodejs/undici/releases/tag/v7.30.1
   "undici@7.29.1": "7.30.1"
 
-minimumReleaseAgeExclude:
-  - "@cloudflare/workerd-darwin-64@1.20260907.1"
-  - "@cloudflare/workerd-darwin-arm64@1.20260907.1"
-  - "@cloudflare/workerd-linux-64@1.20260907.1"
-  - "@cloudflare/workerd-linux-arm64@1.20260907.1"
-  - "@cloudflare/workerd-windows-64@1.20260907.1"
-
 autoInstallPeers: false
 strictPeerDependencies: false
 engineStrict: true
