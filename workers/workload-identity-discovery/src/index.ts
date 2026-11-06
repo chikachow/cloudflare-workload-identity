@@ -5,7 +5,10 @@ import {
   workloadIdentityJwksPath,
 } from "workload-identity-profile";
 
-export type WorkloadIdentityDiscoveryEnv = WorkloadIdentityDiscoveryBindings;
+// Validate arbitrary JWK Set objects at the runtime boundary.
+export type WorkloadIdentityDiscoveryEnv = Omit<Cloudflare.Env, "PUBLIC_JWK_SET"> & {
+  PUBLIC_JWK_SET: object;
+};
 
 const publicJsonHeaders = {
   "cache-control": "public, max-age=300",

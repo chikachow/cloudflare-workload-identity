@@ -28,9 +28,9 @@ Once appropriate checks pass, repeat or broaden them only for new changes, failu
 
 ## Tooling and build verification
 
-Use pinned tooling and generators. Edit configuration or source declarations rather than generated `.wrangler/types` output. Each Worker owns a `wrangler.jsonc` configuration and generates its binding and runtime declarations before typechecking source. Keep Worker runtime code compatible with its configured compatibility date and flags.
+Use pinned tooling and generators. Edit configuration or source declarations rather than generated `.cloudflare` output. Each Worker owns its cf configuration and cf/Wrangler dependencies; typechecking generates its binding and runtime declarations before checking source. Keep Worker runtime code compatible with its configured compatibility date and flags.
 
-For build or configuration changes, inspect effective output and deployed exports as well as typechecks. `check` runs both Workers' deployment dry-runs, and the workerd suites consume their Wrangler configurations. For entrypoint changes, exercise the affected Worker in workerd; a passing typecheck or deployment dry-run alone does not establish runtime startup or RPC behavior.
+For build or configuration changes, inspect effective output and exports as well as typechecks. `check` builds both Workers before checking their example exposure and binding contracts. The workerd suites consume the cf configurations; for entrypoint changes, exercise the affected Worker in workerd to verify startup and RPC behavior.
 
 When replacing a recorded verification baseline or oracle, preserve its provenance and keep previous evidence recoverable. Use an independently reviewed successor and justify changed expectations from requirements and independent evidence, not merely by copying generated output.
 
