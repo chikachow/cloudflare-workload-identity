@@ -31,26 +31,13 @@ function isAuthority(value: string): boolean {
 }
 
 function isIpv6(value: string): boolean {
-  const halves = value.split("::");
-  if (halves.length > 2) return false;
-  const groups = halves.flatMap((half) => (half === "" ? [] : half.split(":")));
-  let length = 0;
-  for (const [index, group] of groups.entries()) {
-    if (/^[0-9A-Fa-f]{1,4}$/u.test(group)) {
-      length += 1;
-    } else if (index === groups.length - 1 && value.endsWith(group) && isIpv4(group)) {
-      length += 2;
-    } else {
-      return false;
-    }
+  // Validate only an isolated IPv6 address with URL, never the identifier.
+  // Restrict its alphabet to prevent preprocessing or URL-component injection.
+  if (!/^[0-9A-Fa-f:.]+$/u.test(value)) return false;
+  try {
+    new URL(`https://[${value}]/`);
+    return true;
+  } catch {
+    return false;
   }
-  return halves.length === 2 ? length < 8 : length === 8;
-}
-
-function isIpv4(value: string): boolean {
-  const octets = value.split(".");
-  return (
-    octets.length === 4 &&
-    octets.every((octet) => /^(?:0|[1-9][0-9]{0,2})$/u.test(octet) && Number(octet) <= 255)
-  );
 }
