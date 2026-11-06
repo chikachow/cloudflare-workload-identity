@@ -41,7 +41,10 @@ pnpm install --frozen-lockfile
 CI installs the manifest pin, and the local `check` command verifies it.
 `pmOnFail: ignore` keeps the lockfile as one YAML document for GitHub's dependency
 graph; direct pnpm commands do not automatically select or enforce the pin.
-Adding config dependencies requires reviewing that compatibility assumption.
+The updater must retain this workspace policy: overriding it with
+`--pm-on-fail=error` makes `pnpm self-update` write a separate package-manager
+document. `pnpm:check` rejects that format. Adding config dependencies requires
+reviewing that compatibility assumption.
 
 Dependency updates allow intermediate peer conflicts while Dependabot assembles
 its grouped updates (`strictPeerDependencies: false`). Required peers remain
