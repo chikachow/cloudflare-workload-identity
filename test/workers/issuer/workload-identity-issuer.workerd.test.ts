@@ -9,6 +9,39 @@ const audience = "https://api.github.com";
 const subject = "repo:chikachow/example:ref:refs/heads/main";
 
 describe("WorkloadIdentityIssuer workerd RPC entrypoint", () => {
+  it("preserves generic URI identifiers across RPC and signing", async () => {
+    const exactAudience = "x://[v1.name]:999999/a/../b?c=%2f#d";
+    const exactSubject = "x://[2001:0DB8:0:0:0:0:2:1]/";
+    const worker = exports.WorkloadIdentityIssuer({
+      props: { allowedAudiences: [exactAudience], subject: exactSubject },
+    });
+    using issued = await worker.issueToken(exactAudience);
+    const verified = await jwtVerify(issued.token, signingPublicJwk, {
+      algorithms: ["RS256"],
+      issuer,
+      audience: exactAudience,
+      subject: exactSubject,
+    });
+    expect(verified.payload.aud).toBe(exactAudience);
+    expect(verified.payload.sub).toBe(exactSubject);
+  });
+
+  it.each([
+    { allowedAudiences: [audience], subject: "x://[x@[::1]/" },
+    { allowedAudiences: [audience, "x:%GG"], subject },
+  ])("rejects malformed URI binding properties %j", async (props) => {
+    const worker = exports.WorkloadIdentityIssuer({ props });
+    let failure: unknown;
+    try {
+      using call = worker.issueToken(audience);
+      await call;
+    } catch (error) {
+      failure = error;
+    }
+    expect(failure).toBeInstanceOf(Error);
+    expect((failure as Error).message).toContain("StringOrURI");
+  });
+
   it("crosses RPC props and runtime signing configuration", async () => {
     const worker = exports.WorkloadIdentityIssuer({
       props: { allowedAudiences: [audience], subject },

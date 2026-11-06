@@ -261,7 +261,7 @@ describe("WorkloadIdentityIssuer RPC issueToken", () => {
   );
 
   it("preserves the exact bound audience and subject", async () => {
-    const exactAudience = ` ${audience} `;
+    const exactAudience = " opaque audience ";
     const boundSubject = "another-workload";
     const issued = await issueWorkloadIdentityToken(exactAudience, validEnv, {
       allowedAudiences: [audience, exactAudience],
@@ -273,6 +273,37 @@ describe("WorkloadIdentityIssuer RPC issueToken", () => {
       issuer,
     });
     expect(verified.payload.sub).toBe(boundSubject);
+  });
+
+  it.each([
+    { subject: "x:a b", allowedAudiences: [audience] },
+    { subject, allowedAudiences: [audience, "x:?bad=%GG"] },
+  ])(
+    "rejects malformed StringOrURI binding properties %j before reading the secret",
+    async (props) => {
+      const get = vi.fn(async () => signingPrivateKeyPem);
+      await expect(
+        issueWorkloadIdentityToken(audience, { ...validEnv, SIGNING_PRIVATE_KEY: { get } }, props),
+      ).rejects.toThrow("StringOrURI");
+      expect(get).not.toHaveBeenCalled();
+    },
+  );
+
+  it("preserves URI spelling without normalization in signed claims", async () => {
+    const exactAudience = "X://EXAMPLE/a/../b?value=%2f#fragment";
+    const exactSubject = "URN:Example:a%2fb";
+    const issued = await issueWorkloadIdentityToken(exactAudience, validEnv, {
+      subject: exactSubject,
+      allowedAudiences: [exactAudience],
+    });
+    const verified = await jwtVerify(issued.token, signingPublicJwk, {
+      algorithms: ["RS256"],
+      issuer,
+      audience: exactAudience,
+      subject: exactSubject,
+    });
+    expect(verified.payload.aud).toBe(exactAudience);
+    expect(verified.payload.sub).toBe(exactSubject);
   });
 
   for (const [name, props, message] of [
