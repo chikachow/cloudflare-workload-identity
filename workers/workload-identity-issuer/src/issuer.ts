@@ -55,8 +55,9 @@ export async function issueWorkloadIdentityToken(
     .setJti(crypto.randomUUID())
     .sign(privateKey);
 
-  // Bound outstanding old-key requests by their start time during rotation.
-  // Do not return a credential whose lifetime elapsed while loading or signing.
+  // Bound old-key token validity by request-start expiration during rotation.
+  // Reject when the runtime-observed clock reaches expiry; hosted Workers
+  // freeze Date.now() between I/O events.
   if (Math.floor(Date.now() / 1_000) >= startedAt + tokenLifetimeSeconds) {
     throw new Error("Workload identity token issuance expired. Retry the request.");
   }

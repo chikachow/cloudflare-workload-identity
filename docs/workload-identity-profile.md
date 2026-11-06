@@ -78,14 +78,20 @@ clock-skew policy. It must not accept an algorithm based only on a
 token-controlled header.
 
 The signed payload contains exactly the registered claims `iss`, `sub`, `aud`,
-`iat`, `exp`, and `jti`; `iat` and `exp` are integer NumericDate values. The
-lifetime is exactly five minutes from the start of issuance, including time
-spent retrieving the signing key and signing. An attempt that completes at or
-after its expiration fails instead of returning an expired token; callers may
-make a new request. Keeping this request-start bound also limits outstanding
-old-key attempts during rotation. `exp` is the sole expiration value in the RPC
-contract: `IssuedToken` contains only `token`, so callers derive any expiry
-information from the signed JWT rather than an unsigned duplicate.
+`iat`, `exp`, and `jti`; `iat` and `exp` are integer NumericDate values. `iat`
+is the runtime-observed time at the start of issuance, rounded down to whole
+seconds, and `exp` is exactly five minutes later. Retrieving the signing key and signing do not
+extend that expiration. After signing, an attempt fails if the runtime's
+observed clock has reached `exp`; callers may make a new request.
+
+Hosted Cloudflare Workers [advance `Date.now()` only after I/O](https://developers.cloudflare.com/workers/runtime-apis/performance/).
+The observed clock can remain unchanged during signing, so the completion
+check cannot guarantee that a token remains unexpired when returned or
+received; verifiers must still enforce the signed `exp`. The
+request-start expiration bounds the validity of outstanding old-key attempts
+during rotation. `exp` is the sole expiration value in the RPC contract:
+`IssuedToken` contains only `token`, so callers derive any expiry information
+from the signed JWT rather than an unsigned duplicate.
 
 `jti` is an assertion identifier. It is not a replay-prevention mechanism:
 this profile does not maintain a consumed-identifier store, and recipients must
