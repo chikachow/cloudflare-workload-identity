@@ -152,12 +152,14 @@ describe("WorkloadIdentityIssuer RPC issueToken", () => {
     }
   });
 
-  it("rejects a token if signing consumes the remaining lifetime", async () => {
+  it("rejects when the observed clock reaches expiry after signing", async () => {
     const startedAt = 1_775_000_000;
     const clock = vi.spyOn(Date, "now").mockReturnValue(startedAt * 1_000);
     const sign = crypto.subtle.sign.bind(crypto.subtle);
     const signing = vi.spyOn(crypto.subtle, "sign").mockImplementation(async (...args) => {
       const signature = await sign(...args);
+      // Model an observed clock advance. Hosted Workers can keep time frozen
+      // during signing; this does not establish wall-clock completion behavior.
       clock.mockReturnValue((startedAt + 300) * 1_000);
       return signature;
     });
