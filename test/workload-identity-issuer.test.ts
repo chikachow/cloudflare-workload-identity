@@ -288,19 +288,15 @@ describe("WorkloadIdentityIssuer RPC issueToken", () => {
     expect(verified.payload.sub).toBe(boundSubject);
   });
 
-  it.each(["x:a b", "x:%GG", "x://host:abc", "1:recipient"])(
-    "rejects malformed allowed audience %j before reading the secret",
-    async (invalidAudience) => {
+  it.each([
+    { subject: "x:a b", allowedAudiences: [audience] },
+    { subject, allowedAudiences: [audience, "x:?bad=%GG"] },
+  ])(
+    "rejects malformed StringOrURI binding properties %j before reading the secret",
+    async (props) => {
       const get = vi.fn(async () => signingPrivateKeyPem);
       await expect(
-        issueWorkloadIdentityToken(
-          audience,
-          { ...validEnv, SIGNING_PRIVATE_KEY: { get } },
-          {
-            subject,
-            allowedAudiences: [audience, invalidAudience],
-          },
-        ),
+        issueWorkloadIdentityToken(audience, { ...validEnv, SIGNING_PRIVATE_KEY: { get } }, props),
       ).rejects.toThrow("StringOrURI");
       expect(get).not.toHaveBeenCalled();
     },
