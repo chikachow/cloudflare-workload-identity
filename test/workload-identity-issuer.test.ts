@@ -1,4 +1,4 @@
-import { exportJWK, exportPKCS8, jwtVerify } from "jose";
+import { calculateJwkThumbprint, exportJWK, exportPKCS8, jwtVerify } from "jose";
 import { describe, expect, it, vi } from "vitest";
 
 import {
@@ -65,11 +65,21 @@ describe("WorkloadIdentityIssuer RPC issueToken", () => {
         exp: now + 300,
         iat: now,
         iss: issuer,
-        jti: expect.stringMatching(
-          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu,
-        ),
+        jti: expect.any(String),
         sub: subject,
       });
+      expect(verified.payload.jti).not.toBe("");
+
+      const repeated = await issueWorkloadIdentityToken(audience, validEnv, validProps);
+      const repeatedVerified = await jwtVerify(repeated.token, signingPublicJwk, {
+        algorithms: ["RS256"],
+        audience,
+        currentDate: new Date(now * 1_000),
+        issuer,
+      });
+      expect(repeatedVerified.payload.jti).toEqual(expect.any(String));
+      expect(repeatedVerified.payload.jti).not.toBe("");
+      expect(repeatedVerified.payload.jti).not.toBe(verified.payload.jti);
     } finally {
       clock.mockRestore();
     }
@@ -214,8 +224,9 @@ describe("WorkloadIdentityIssuer RPC issueToken", () => {
     const second = await issueWorkloadIdentityToken(audience, env, validProps);
     const options = { algorithms: ["RS256"], audience, issuer };
     await jwtVerify(first.token, signingPublicJwk, options);
-    const verified = await jwtVerify(second.token, await exportJWK(keyPair.publicKey), options);
-    expect(verified.protectedHeader.kid).not.toBe(signingPublicJwk.kid);
+    const publicJwk = await exportJWK(keyPair.publicKey);
+    const verified = await jwtVerify(second.token, publicJwk, options);
+    expect(verified.protectedHeader.kid).toBe(await calculateJwkThumbprint(publicJwk));
     expect(get).toHaveBeenCalledTimes(3);
   });
 
