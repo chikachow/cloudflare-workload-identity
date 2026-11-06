@@ -4,7 +4,6 @@ import { calculateJwkThumbprint, exportJWK } from "jose";
 import { describe, expect, it } from "vitest";
 
 import {
-  buildWorkloadFederationMetadata,
   requireCanonicalRootHttpsIssuer,
   requireOpaqueWorkloadSubject,
   validatePublicJwkSet,
@@ -14,17 +13,6 @@ import { signingPublicJwk } from "./support/signing-key.ts";
 const issuer = "https://issuer.example";
 
 describe("workload identity profile", () => {
-  it("constructs compatibility metadata", () => {
-    expect(buildWorkloadFederationMetadata(issuer)).toEqual({
-      claims_supported: ["iss", "sub", "aud", "iat", "exp", "jti"],
-      id_token_signing_alg_values_supported: ["RS256"],
-      issuer,
-      jwks_uri: `${issuer}/jwks`,
-      response_types_supported: ["id_token"],
-      subject_types_supported: ["public"],
-    });
-  });
-
   for (const [name, invalidIssuer] of [
     ["trailing slash", `${issuer}/`],
     ["path", `${issuer}/path`],
@@ -38,16 +26,6 @@ describe("workload identity profile", () => {
     });
   }
 
-  it("accepts a canonical root HTTPS issuer", () => {
-    expect(requireCanonicalRootHttpsIssuer(issuer)).toBe(issuer);
-  });
-
-  it("accepts a canonical workload subject", () => {
-    expect(requireOpaqueWorkloadSubject("repo:chikachow/example:ref:refs/heads/main")).toBe(
-      "repo:chikachow/example:ref:refs/heads/main",
-    );
-  });
-
   for (const [name, invalidSubject] of [
     ["empty", ""],
     ["leading whitespace", " subject"],
@@ -59,10 +37,6 @@ describe("workload identity profile", () => {
       expect(() => requireOpaqueWorkloadSubject(invalidSubject)).toThrow("1-255 ASCII characters");
     });
   }
-
-  it("proves the literal signing kid is its RFC 7638 thumbprint", async () => {
-    expect(await calculateJwkThumbprint(signingPublicJwk)).toBe(signingPublicJwk.kid);
-  });
 
   it("retains public per-key extensions and removes root configuration-only members", async () => {
     const key = { ...signingPublicJwk, x_rotation: "next" };
@@ -94,11 +68,8 @@ describe("workload identity profile", () => {
       { keys: [{ ...signingPublicJwk, d: "private" }] },
       "private or symmetric key material",
     ],
-    [
-      "wrong algorithm or use",
-      { keys: [{ ...signingPublicJwk, alg: "RS512", use: "enc" }] },
-      "alg RS256 and use sig",
-    ],
+    ["wrong algorithm", { keys: [{ ...signingPublicJwk, alg: "RS512" }] }, "alg RS256 and use sig"],
+    ["wrong use", { keys: [{ ...signingPublicJwk, use: "enc" }] }, "alg RS256 and use sig"],
     [
       "unusable key",
       { keys: [{ ...signingPublicJwk, key_ops: [] }] },

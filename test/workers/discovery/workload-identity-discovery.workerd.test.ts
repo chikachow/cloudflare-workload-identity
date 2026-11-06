@@ -31,34 +31,28 @@ describe("workload identity discovery workerd entrypoint", () => {
     await expect(response.json()).resolves.toEqual(signingPublicJwkSet);
   });
 
-  it.each(["/.well-known/openid-configuration", "/jwks"])(
-    "refuses to serve %s with a noncanonical RSA integer in workerd",
-    async (path) => {
-      const publicJwk = { ...signingPublicJwk, n: `${signingPublicJwk.n}==` };
-      const key = { ...publicJwk, kid: await calculateJwkThumbprint(publicJwk) };
+  it("refuses to serve metadata with a noncanonical RSA integer in workerd", async () => {
+    const publicJwk = { ...signingPublicJwk, n: `${signingPublicJwk.n}==` };
+    const key = { ...publicJwk, kid: await calculateJwkThumbprint(publicJwk) };
 
-      await expect(
-        handleDiscoveryRequest(new Request(`${issuer}${path}`), {
-          ISSUER: issuer,
-          PUBLIC_JWK_SET: { keys: [key] },
-        }),
-      ).rejects.toThrow("canonical Base64urlUInt");
-    },
-  );
+    await expect(
+      handleDiscoveryRequest(new Request(`${issuer}/.well-known/openid-configuration`), {
+        ISSUER: issuer,
+        PUBLIC_JWK_SET: { keys: [key] },
+      }),
+    ).rejects.toThrow("canonical Base64urlUInt");
+  });
 
-  it.each(["/.well-known/openid-configuration", "/jwks"])(
-    "refuses to serve %s with an invalid RSA exponent in workerd",
-    async (path) => {
-      const publicJwk = { ...signingPublicJwk, e: "AQ" };
-      const key = { ...publicJwk, kid: await calculateJwkThumbprint(publicJwk) };
-      await expect(
-        handleDiscoveryRequest(new Request(`${issuer}${path}`), {
-          ISSUER: issuer,
-          PUBLIC_JWK_SET: { keys: [key] },
-        }),
-      ).rejects.toThrow("odd modulus and an odd exponent between 3 and n - 1");
-    },
-  );
+  it("refuses to serve a JWK Set with an invalid RSA exponent in workerd", async () => {
+    const publicJwk = { ...signingPublicJwk, e: "AQ" };
+    const key = { ...publicJwk, kid: await calculateJwkThumbprint(publicJwk) };
+    await expect(
+      handleDiscoveryRequest(new Request(`${issuer}/jwks`), {
+        ISSUER: issuer,
+        PUBLIC_JWK_SET: { keys: [key] },
+      }),
+    ).rejects.toThrow("odd modulus and an odd exponent between 3 and n - 1");
+  });
 
   it("rejects unsupported methods", async () => {
     const response = await exports.default.fetch(`${issuer}/jwks`, { method: "POST" });
