@@ -26,7 +26,8 @@ updates:
       cloudflare-workers-sdk:
         patterns:
           - "@cloudflare/vitest-plugin"
-          - wrangler
+          - "@cloudflare/vite-plugin"
+          - cf
       oxc-tooling:
         patterns:
           - oxfmt

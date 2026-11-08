@@ -1,5 +1,12 @@
 {
   "extends": "../../tsconfig.base.json",
-  "compilerOptions": { "lib": ["ES2024", "WebWorker"] },
-  "include": [".wrangler/types/worker-configuration.d.ts", "src/**/*.ts"]
+  "compilerOptions": {
+    "lib": ["ES2024", "WebWorker"]
+  },
+  "include": [
+    ".cloudflare/types/index.d.ts",
+    "src/**/*.ts",
+    "cloudflare.config.ts",
+    "vite.config.ts"
+  ]
 }
