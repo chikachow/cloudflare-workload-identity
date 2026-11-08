@@ -13,10 +13,7 @@ export const tokenLifetimeSeconds = workloadIdentityTokenLifetimeSeconds;
 
 export type SigningPrivateKeySource = string | SecretsStoreSecret;
 
-export type WorkloadIdentityIssuerEnv = Omit<
-  WorkloadIdentityIssuerBindings,
-  "SIGNING_PRIVATE_KEY"
-> & {
+export type WorkloadIdentityIssuerEnv = Omit<Cloudflare.Env, "SIGNING_PRIVATE_KEY"> & {
   readonly SIGNING_PRIVATE_KEY: SigningPrivateKeySource;
 };
 
