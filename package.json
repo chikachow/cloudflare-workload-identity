@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "@cloudflare/vitest-plugin": "1.6.0",
-    "@tsconfig/strictest": "2.0.8",
+    "@tsconfig/strictest": "2.0.9",
     "@types/node": "24.19.2",
     "@vitest/coverage-istanbul": "5.1.0",
     "oxfmt": "0.78.0",
